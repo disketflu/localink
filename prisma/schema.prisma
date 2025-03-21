@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String
+  image         String?
+  role          Role      @default(TOURIST)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  profile       Profile?
+  toursOffered  Tour[]    @relation("TourGuide")
+  bookings      Booking[] @relation("Tourist")
+  reviews       Review[]  @relation("ReviewAuthor")
+  receivedReviews Review[] @relation("ReviewedGuide")
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  bio         String?
+  location    String?
+  languages   String[]
+  expertise   String[]
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Tour {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  location    String
+  price       Float
+  duration    Int      // in hours
+  maxGroupSize Int
+  included    String[]
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  guideId     String
+  guide       User     @relation("TourGuide", fields: [guideId], references: [id])
+  bookings    Booking[]
+  reviews     Review[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  date      DateTime
+  status    BookingStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tourId    String
+  tour      Tour     @relation(fields: [tourId], references: [id])
+  touristId String
+  tourist   User     @relation("Tourist", fields: [touristId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tourId    String
+  tour      Tour     @relation(fields: [tourId], references: [id])
+  authorId  String
+  author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
+  guideId   String
+  guide     User     @relation("ReviewedGuide", fields: [guideId], references: [id])
+}
+
+enum Role {
+  TOURIST
+  GUIDE
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
