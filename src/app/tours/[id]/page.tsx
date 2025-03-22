@@ -9,6 +9,7 @@ import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 import ReviewForm from "@/components/ReviewForm"
 import ReviewList from "@/components/ReviewList"
+import { Input } from "@/components/ui/Input"
 
 interface Tour {
   id: string
@@ -48,43 +49,53 @@ interface Review {
   }
 }
 
+interface Booking {
+  id: string
+  tourId: string
+  touristId: string
+  status: string
+  date: string
+}
+
 export default function TourDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [tour, setTour] = useState<Tour | null>(null)
-  const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState("")
+  const [tour, setTour] = useState<Tour | null>(null)
+  const [userBooking, setUserBooking] = useState<Booking | null>(null)
   const [bookingDate, setBookingDate] = useState("")
+  const [bookingError, setBookingError] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
 
-  const resolvedParams = use(params)
-
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login")
-    }
-  }, [status, router])
-
-  useEffect(() => {
-    const fetchTourAndReviews = async () => {
+    const fetchData = async () => {
       try {
-        const [tourResponse, reviewsResponse] = await Promise.all([
+        const [tourResponse, bookingsResponse] = await Promise.all([
           fetch(`/api/tours/${resolvedParams.id}`),
-          fetch(`/api/reviews?tourId=${resolvedParams.id}`),
+          fetch("/api/bookings"),
         ])
 
-        if (!tourResponse.ok || !reviewsResponse.ok) {
-          throw new Error("Failed to fetch tour or reviews")
+        if (!tourResponse.ok || !bookingsResponse.ok) {
+          throw new Error("Failed to fetch data")
         }
 
-        const [tourData, reviewsData] = await Promise.all([
+        const [tourData, bookingsData] = await Promise.all([
           tourResponse.json(),
-          reviewsResponse.json(),
+          bookingsResponse.json(),
         ])
 
         setTour(tourData)
-        setReviews(reviewsData)
+        
+        // Find user's completed booking for this tour
+        const userBooking = bookingsData.find(
+          (booking: Booking) =>
+            booking.tourId === resolvedParams.id &&
+            booking.touristId === session?.user?.id &&
+            booking.status === "COMPLETED"
+        )
+        setUserBooking(userBooking)
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load tour details")
       } finally {
@@ -92,8 +103,10 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
       }
     }
 
-    fetchTourAndReviews()
-  }, [resolvedParams.id])
+    if (status === "authenticated") {
+      fetchData()
+    }
+  }, [resolvedParams.id, status, session?.user?.id])
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,12 +159,13 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
     )
   }
 
-  const averageRating = tour.reviews.length > 0
-    ? tour.reviews.reduce((acc, review) => acc + review.rating, 0) / tour.reviews.length
+  const reviews = tour.reviews || []
+  const averageRating = reviews.length > 0
+    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
     : 0
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50 py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-sm rounded-lg overflow-hidden">
           <div className="relative h-96">
@@ -204,10 +218,10 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
                 <div className="mt-8">
                   <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
                   <div className="mt-4 space-y-6">
-                    {tour.reviews.length === 0 ? (
+                    {reviews.length === 0 ? (
                       <p className="text-gray-500">No reviews yet</p>
                     ) : (
-                      tour.reviews.map((review) => (
+                      reviews.map((review) => (
                         <div key={review.id} className="border-b border-gray-200 pb-6">
                           <div className="flex items-center">
                             <img
@@ -285,27 +299,135 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Reviews Section */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>
+        {/* Booking Form */}
+        {session?.user?.role === "TOURIST" && !userBooking && (
+          <div className="mt-8">
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                  Book this tour
+                </h3>
+                <div className="mt-2 max-w-xl text-sm text-gray-500">
+                  <p>Select a date to book this tour.</p>
+                </div>
+
+                <form onSubmit={handleBooking} className="mt-5">
+                  <div className="flex items-center space-x-4">
+                    <Input
+                      type="date"
+                      value={bookingDate}
+                      onChange={(e) => setBookingDate(e.target.value)}
+                      required
+                      min={new Date().toISOString().split("T")[0]}
+                      error={bookingError}
+                    />
+                    <button
+                      type="submit"
+                      disabled={bookingLoading}
+                      className="inline-flex justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {bookingLoading ? "Booking..." : "Book Now"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Review Form */}
+        {session?.user?.role === "TOURIST" && userBooking && (
+          <div className="mt-8">
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                  Leave a Review
+                </h3>
+                <div className="mt-2 max-w-xl text-sm text-gray-500">
+                  <p>Share your experience with this tour.</p>
+                </div>
+
+                <div className="mt-5">
+                  <ReviewForm
+                    tourId={resolvedParams.id}
+                    onSubmit={async () => {
+                      // Refresh tour data after submission
+                      const response = await fetch(`/api/tours/${resolvedParams.id}`)
+                      if (response.ok) {
+                        const tourData = await response.json()
+                        setTour(tourData)
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reviews Section */}
         <div className="mt-8">
-          <ReviewList reviews={reviews} />
-        </div>
-        <div className="mt-8">
-          <h3 className="text-lg font-medium text-gray-900">Write a Review</h3>
-          <div className="mt-4">
-            <ReviewForm
-              tourId={resolvedParams.id}
-              onSubmit={() => {
-                // Refresh reviews after submission
-                fetch(`/api/reviews?tourId=${resolvedParams.id}`)
-                  .then((res) => res.json())
-                  .then(setReviews)
-                  .catch(console.error)
-              }}
-            />
+          <div className="bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                Reviews
+              </h3>
+              <div className="mt-2 max-w-xl text-sm text-gray-500">
+                <p>What others are saying about this tour.</p>
+              </div>
+
+              <div className="mt-5 space-y-6">
+                {reviews.length === 0 ? (
+                  <p className="text-gray-500">No reviews yet. Be the first to review!</p>
+                ) : (
+                  reviews.map((review) => (
+                    <div key={review.id} className="border-t border-gray-200 pt-5">
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          {review.author.image ? (
+                            <Image
+                              src={review.author.image}
+                              alt={review.author.name}
+                              width={40}
+                              height={40}
+                              className="rounded-full"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-500">
+                                {review.author.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <h4 className="text-sm font-medium text-gray-900">
+                            {review.author.name}
+                          </h4>
+                          <div className="flex items-center">
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <StarIcon
+                                key={value}
+                                className={`h-4 w-4 ${
+                                  value <= review.rating
+                                    ? "text-yellow-400"
+                                    : "text-gray-300"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="ml-auto text-sm text-gray-500">
+                          {new Date(review.createdAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600">{review.comment}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

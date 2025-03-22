@@ -1,156 +1,414 @@
 "use client"
 
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
+import Image from "next/image"
+import { StarIcon } from "@heroicons/react/20/solid"
 
 interface Tour {
   id: string
   title: string
+  description: string
   location: string
   price: number
-  bookings: {
-    id: string
-    date: string
-    status: string
-  }[]
+  duration: number
+  maxGroupSize: number
+  included: string[]
+  imageUrl: string
+  bookings: Booking[]
+  reviews: Review[]
+}
+
+interface Booking {
+  id: string
+  date: string
+  status: string
+  tourId: string
+  tourist: {
+    name: string
+    email: string
+  }
+}
+
+interface Review {
+  id: string
+  rating: number
+  comment: string
+  createdAt: string
+  author: {
+    name: string
+    email: string
+  }
 }
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
-  const router = useRouter()
-  const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [tours, setTours] = useState<Tour[]>([])
+  const [activeTab, setActiveTab] = useState("tours")
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/auth/login")
-    }
-  }, [status, router])
-
-  useEffect(() => {
-    if (session?.user.role !== "GUIDE") {
-      router.push("/")
-    }
-  }, [session, router])
-
-  useEffect(() => {
-    const fetchTours = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("/api/tours")
-        if (!response.ok) {
-          throw new Error("Failed to fetch tours")
+        const [toursResponse, bookingsResponse] = await Promise.all([
+          fetch("/api/tours"),
+          fetch("/api/bookings"),
+        ])
+
+        if (!toursResponse.ok || !bookingsResponse.ok) {
+          throw new Error("Failed to fetch data")
         }
-        const data = await response.json()
-        setTours(data)
-      } catch (error) {
-        console.error("Error fetching tours:", error)
+
+        const [toursData, bookingsData] = await Promise.all([
+          toursResponse.json(),
+          bookingsResponse.json(),
+        ])
+
+        // Combine tours with their bookings
+        const toursWithBookings = toursData.map((tour: Tour) => ({
+          ...tour,
+          bookings: bookingsData.filter((booking: Booking) => booking.tourId === tour.id),
+        }))
+
+        setTours(toursWithBookings)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load dashboard")
       } finally {
         setLoading(false)
       }
     }
 
-    if (session?.user.role === "GUIDE") {
-      fetchTours()
+    if (status === "authenticated") {
+      fetchData()
     }
-  }, [session])
+  }, [status])
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">Loading...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            Please{" "}
+            <Link href="/login" className="text-indigo-600 hover:text-indigo-500">
+              sign in
+            </Link>{" "}
+            to access your dashboard.
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-red-600">{error}</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50 py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-sm rounded-lg p-6">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Your Tours</h1>
-            <Link
-              href="/tours/create"
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-            >
-              <svg className="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-              </svg>
-              Create New Tour
-            </Link>
+        <div className="sm:flex sm:items-center">
+          <div className="sm:flex-auto">
+            <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+            <p className="mt-2 text-sm text-gray-700">
+              Welcome back, {session?.user?.name}
+            </p>
           </div>
-
-          {tours.length === 0 ? (
-            <div className="text-center py-12">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
+          {session?.user?.role === "GUIDE" && (
+            <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+              <Link
+                href="/tours/create"
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                />
-              </svg>
-              <h3 className="mt-2 text-sm font-semibold text-gray-900">No tours</h3>
-              <p className="mt-1 text-sm text-gray-500">Get started by creating a new tour.</p>
-              <div className="mt-6">
-                <Link
-                  href="/tours/create"
-                  className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
-                >
-                  <svg className="mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                  </svg>
-                  Create your first tour
-                </Link>
-              </div>
+                Create Tour
+              </Link>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          )}
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="mt-8 border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab("tours")}
+              className={`${
+                activeTab === "tours"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Tours
+            </button>
+            <button
+              onClick={() => setActiveTab("bookings")}
+              className={`${
+                activeTab === "bookings"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Bookings
+            </button>
+            {session?.user?.role === "GUIDE" && (
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`${
+                  activeTab === "reviews"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+              >
+                Reviews
+              </button>
+            )}
+          </nav>
+        </div>
+
+        {/* Content */}
+        <div className="mt-8">
+          {activeTab === "tours" && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {tours.map((tour) => (
                 <div
                   key={tour.id}
-                  className="relative flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white hover:shadow-md transition-shadow"
+                  className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
                 >
-                  <div className="flex flex-1 flex-col justify-between p-6">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">{tour.title}</h3>
-                      <p className="mt-2 flex items-center text-sm text-gray-500">
-                        <svg className="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
-                        </svg>
-                        {tour.location}
-                      </p>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between">
-                      <div className="flex items-center">
-                        <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" clipRule="evenodd" />
-                        </svg>
-                        <span className="ml-2 text-sm text-gray-500">{tour.bookings.length} bookings</span>
+                  <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+                    {tour.imageUrl ? (
+                      <Image
+                        src={tour.imageUrl}
+                        alt={tour.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No image</span>
                       </div>
-                      <div className="flex items-center space-x-4">
-                        <span className="text-lg font-semibold text-gray-900">${tour.price}</span>
+                    )}
+                    {session?.user?.role === "GUIDE" && (
+                      <div className="absolute top-2 right-2 flex space-x-2">
                         <Link
                           href={`/tours/${tour.id}/edit`}
-                          className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
+                          className="rounded-md bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
-                          Edit
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
                         </Link>
+                        <button
+                          onClick={async () => {
+                            if (confirm("Are you sure you want to delete this tour?")) {
+                              try {
+                                const response = await fetch(`/api/tours/${tour.id}`, {
+                                  method: "DELETE",
+                                })
+                                if (!response.ok) {
+                                  throw new Error("Failed to delete tour")
+                                }
+                                setTours(tours.filter((t) => t.id !== tour.id))
+                              } catch (err) {
+                                console.error("Error deleting tour:", err)
+                              }
+                            }
+                          }}
+                          className="rounded-md bg-white p-1 text-gray-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          <svg
+                            className="h-5 w-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </button>
                       </div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium text-gray-900">{tour.title}</h3>
+                    <p className="mt-1 text-sm text-gray-500">{tour.location}</p>
+                    <div className="mt-2 flex items-center justify-between">
+                      <div className="flex items-center">
+                        <StarIcon className="h-5 w-5 text-yellow-400" />
+                        <span className="ml-1 text-sm text-gray-600">
+                          {tour.bookings.length} bookings
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        ${tour.price}
+                      </span>
                     </div>
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {activeTab === "bookings" && (
+            <div className="overflow-hidden bg-white shadow sm:rounded-md">
+              <ul className="divide-y divide-gray-200">
+                {tours.flatMap((tour) =>
+                  tour.bookings.map((booking) => (
+                    <li key={booking.id}>
+                      <div className="px-4 py-4 sm:px-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0">
+                              {tour.imageUrl ? (
+                                <Image
+                                  src={tour.imageUrl}
+                                  alt={tour.title}
+                                  width={48}
+                                  height={48}
+                                  className="rounded-lg"
+                                />
+                              ) : (
+                                <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
+                                  <span className="text-gray-400">No image</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <h4 className="text-sm font-medium text-gray-900">
+                                {tour.title}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {new Date(booking.date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <span
+                              className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                booking.status === "CONFIRMED"
+                                  ? "bg-green-100 text-green-800"
+                                  : booking.status === "PENDING"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : booking.status === "CANCELLED"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
+                            >
+                              {booking.status}
+                            </span>
+                            {session?.user?.role === "GUIDE" && (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const response = await fetch(
+                                      `/api/bookings/${booking.id}`,
+                                      {
+                                        method: "PATCH",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          status:
+                                            booking.status === "PENDING"
+                                              ? "CONFIRMED"
+                                              : "CANCELLED",
+                                        }),
+                                      }
+                                    )
+                                    if (!response.ok) {
+                                      throw new Error("Failed to update booking")
+                                    }
+                                    // Refresh the page to show updated status
+                                    window.location.reload()
+                                  } catch (err) {
+                                    console.error("Error updating booking:", err)
+                                  }
+                                }}
+                                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                              >
+                                {booking.status === "PENDING"
+                                  ? "Confirm"
+                                  : booking.status === "CONFIRMED"
+                                  ? "Cancel"
+                                  : ""}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
+
+          {activeTab === "reviews" && session?.user?.role === "GUIDE" && (
+            <div className="overflow-hidden bg-white shadow sm:rounded-md">
+              <ul className="divide-y divide-gray-200">
+                {tours.flatMap((tour) =>
+                  tour.reviews?.map((review) => (
+                    <li key={review.id}>
+                      <div className="px-4 py-4 sm:px-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-900">
+                              {tour.title}
+                            </h4>
+                            <div className="mt-1 flex items-center">
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <StarIcon
+                                  key={value}
+                                  className={`h-4 w-4 ${
+                                    value <= review.rating
+                                      ? "text-yellow-400"
+                                      : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <p className="mt-1 text-sm text-gray-500">
+                              {review.comment}
+                            </p>
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))
+                )}
+              </ul>
             </div>
           )}
         </div>
