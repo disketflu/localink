@@ -96,18 +96,32 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
     }
+
+    const { searchParams } = new URL(request.url)
+    const guideId = searchParams.get("guideId")
 
     const bookings = await prisma.booking.findMany({
       where: {
-        touristId: session.user.id,
+        ...(guideId
+          ? { tour: { guideId } }
+          : { touristId: session.user.id }),
       },
       include: {
         tour: {
           select: {
             title: true,
+            description: true,
+            location: true,
+            price: true,
+            duration: true,
+            maxGroupSize: true,
+            imageUrl: true,
             guide: {
               select: {
                 name: true,
@@ -115,9 +129,15 @@ export async function GET(request: Request) {
             },
           },
         },
+        tourist: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
       },
       orderBy: {
-        date: "asc",
+        createdAt: "desc",
       },
     })
 

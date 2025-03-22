@@ -112,10 +112,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const tourId = searchParams.get("tourId")
     const guideId = searchParams.get("guideId")
+    const touristId = searchParams.get("touristId")
 
-    if (!tourId && !guideId) {
+    if (!tourId && !guideId && !touristId) {
       return NextResponse.json(
-        { error: "Either tourId or guideId is required" },
+        { error: "Either tourId, guideId, or touristId is required" },
         { status: 400 }
       )
     }
@@ -124,6 +125,7 @@ export async function GET(request: Request) {
       where: {
         ...(tourId ? { tourId } : {}),
         ...(guideId ? { tour: { guideId } } : {}),
+        ...(touristId ? { authorId: touristId } : {}),
       },
       include: {
         author: {

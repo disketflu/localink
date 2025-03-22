@@ -1,6 +1,11 @@
+"use client"
+
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 
 export default function Home() {
+  const { data: session } = useSession()
+
   return (
     <div className="bg-white">
       <div className="relative isolate px-6 pt-14 lg:px-8">
@@ -22,12 +27,21 @@ export default function Home() {
               Connect with local guides who know their cities inside out. Experience authentic travel, create unforgettable memories, and explore like a local.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Link
-                href="/auth/register"
-                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Get started
-              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <Link
+                  href="/auth/register"
+                  className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Get started
+                </Link>
+              )}
               <Link href="/tours" className="text-sm font-semibold leading-6 text-gray-900">
                 Browse tours <span aria-hidden="true">→</span>
               </Link>
