@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { sanitizeObject } from "@/lib/sanitize"
 
 export async function GET(
   request: Request,
@@ -13,8 +14,22 @@ export async function GET(
       include: {
         guide: {
           select: {
+            id: true,
             name: true,
             image: true,
+          },
+        },
+        reviews: {
+          include: {
+            author: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
           },
         },
       },
@@ -44,7 +59,37 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if the tour exists and belongs to the guide
+    const body = await request.json()
+    const sanitizedBody = sanitizeObject(body)
+
+    const {
+      title,
+      description,
+      location,
+      price,
+      duration,
+      maxGroupSize,
+      included,
+      imageUrl,
+    } = sanitizedBody
+
+    // Validate required fields
+    if (!title || !description || !location || !price || !duration || !maxGroupSize) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      )
+    }
+
+    // Validate numeric fields
+    if (price <= 0 || duration <= 0 || maxGroupSize <= 0) {
+      return NextResponse.json(
+        { error: "Price, duration, and max group size must be positive numbers" },
+        { status: 400 }
+      )
+    }
+
+    // Check if tour exists and belongs to the guide
     const existingTour = await prisma.tour.findUnique({
       where: { id: params.id },
     })
@@ -60,41 +105,23 @@ export async function PUT(
       )
     }
 
-    const {
-      title,
-      description,
-      location,
-      price,
-      duration,
-      maxGroupSize,
-      includedItems,
-      imageUrl,
-    } = await request.json()
-
-    // Validate required fields
-    if (!title || !description || !location || !price || !duration || !maxGroupSize) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      )
-    }
-
-    // Update the tour
-    const updatedTour = await prisma.tour.update({
+    // Update tour
+    const tour = await prisma.tour.update({
       where: { id: params.id },
       data: {
         title,
         description,
         location,
-        price: parseFloat(price),
-        duration: parseInt(duration),
-        maxGroupSize: parseInt(maxGroupSize),
-        included: includedItems || [],
+        price,
+        duration,
+        maxGroupSize,
+        included: included || [],
         imageUrl,
       },
       include: {
         guide: {
           select: {
+            id: true,
             name: true,
             image: true,
           },
@@ -102,7 +129,7 @@ export async function PUT(
       },
     })
 
-    return NextResponse.json(updatedTour)
+    return NextResponse.json(tour)
   } catch (error) {
     console.error("Error updating tour:", error)
     return NextResponse.json(
@@ -122,7 +149,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if the tour exists and belongs to the guide
+    // Check if tour exists and belongs to the guide
     const tour = await prisma.tour.findUnique({
       where: { id: params.id },
     })
@@ -138,7 +165,7 @@ export async function DELETE(
       )
     }
 
-    // Delete the tour
+    // Delete tour
     await prisma.tour.delete({
       where: { id: params.id },
     })

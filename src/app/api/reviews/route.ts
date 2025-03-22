@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { sanitizeObject } from "@/lib/sanitize"
 
 export async function POST(request: Request) {
   try {
@@ -10,16 +11,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { tourId, rating, comment } = await request.json()
+    const body = await request.json()
+    const sanitizedBody = sanitizeObject(body)
 
+    const { tourId, rating, comment } = sanitizedBody
+
+    // Validate required fields
     if (!tourId || !rating || !comment) {
       return NextResponse.json(
-        { error: "Tour ID, rating, and comment are required" },
+        { error: "Missing required fields" },
         { status: 400 }
       )
     }
 
-    // Check if the tour exists
+    // Validate rating range
+    if (rating < 1 || rating > 5) {
+      return NextResponse.json(
+        { error: "Rating must be between 1 and 5" },
+        { status: 400 }
+      )
+    }
+
+    // Check if tour exists
     const tour = await prisma.tour.findUnique({
       where: { id: tourId },
     })
@@ -28,23 +41,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 })
     }
 
-    // Check if the user has completed a booking for this tour
-    const completedBooking = await prisma.booking.findFirst({
+    // Check if user has completed a booking for this tour
+    const booking = await prisma.booking.findFirst({
       where: {
         tourId,
-        userId: session.user.id,
+        touristId: session.user.id,
         status: "COMPLETED",
       },
     })
 
-    if (!completedBooking) {
+    if (!booking) {
       return NextResponse.json(
         { error: "You can only review tours you have completed" },
         { status: 403 }
       )
     }
 
-    // Check if the user has already reviewed this tour
+    // Check if user has already reviewed this tour
     const existingReview = await prisma.review.findFirst({
       where: {
         tourId,
@@ -59,13 +72,20 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create the review
+    // Create review
     const review = await prisma.review.create({
       data: {
-        tourId,
-        authorId: session.user.id,
         rating,
         comment,
+        tour: {
+          connect: { id: tourId },
+        },
+        author: {
+          connect: { id: session.user.id },
+        },
+        guide: {
+          connect: { id: tour.guideId },
+        },
       },
       include: {
         author: {
@@ -95,24 +115,16 @@ export async function GET(request: Request) {
 
     if (!tourId && !guideId) {
       return NextResponse.json(
-        { error: "Tour ID or Guide ID is required" },
+        { error: "Either tourId or guideId is required" },
         { status: 400 }
       )
     }
 
-    let where = {}
-    if (tourId) {
-      where = { tourId }
-    } else if (guideId) {
-      where = {
-        tour: {
-          guideId,
-        },
-      }
-    }
-
     const reviews = await prisma.review.findMany({
-      where,
+      where: {
+        ...(tourId ? { tourId } : {}),
+        ...(guideId ? { tour: { guideId } } : {}),
+      },
       include: {
         author: {
           select: {

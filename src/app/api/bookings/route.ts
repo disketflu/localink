@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import prisma from "@/lib/prisma"
+import { sanitizeObject } from "@/lib/sanitize"
 
 export async function POST(request: Request) {
   try {
@@ -10,8 +11,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { tourId, date } = await request.json()
+    const body = await request.json()
+    const sanitizedBody = sanitizeObject(body)
 
+    const { tourId, date } = sanitizedBody
+
+    // Validate required fields
     if (!tourId || !date) {
       return NextResponse.json(
         { error: "Tour ID and date are required" },
@@ -19,7 +24,16 @@ export async function POST(request: Request) {
       )
     }
 
-    // Check if the tour exists
+    // Validate date is in the future
+    const bookingDate = new Date(date)
+    if (bookingDate <= new Date()) {
+      return NextResponse.json(
+        { error: "Booking date must be in the future" },
+        { status: 400 }
+      )
+    }
+
+    // Check if tour exists
     const tour = await prisma.tour.findUnique({
       where: { id: tourId },
     })
@@ -28,30 +42,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Tour not found" }, { status: 404 })
     }
 
-    // Check if the date is in the future
-    const bookingDate = new Date(date)
-    if (bookingDate < new Date()) {
+    // Check if user has already booked this tour on this date
+    const existingBooking = await prisma.booking.findFirst({
+      where: {
+        tourId,
+        touristId: session.user.id,
+        date: bookingDate,
+      },
+    })
+
+    if (existingBooking) {
       return NextResponse.json(
-        { error: "Booking date must be in the future" },
+        { error: "You have already booked this tour on this date" },
         { status: 400 }
       )
     }
 
-    // Create the booking
+    // Create booking
     const booking = await prisma.booking.create({
       data: {
+        date: bookingDate,
         tour: {
-          connect: { id: tourId }
+          connect: { id: tourId },
         },
         tourist: {
-          connect: { id: session.user.id }
+          connect: { id: session.user.id },
         },
-        date: bookingDate,
-        status: "PENDING",
       },
       include: {
-        tour: true,
-        tourist: true,
+        tour: {
+          select: {
+            title: true,
+            guide: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     })
 
@@ -72,42 +100,19 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
-    const tourId = searchParams.get("tourId")
-    const userId = searchParams.get("userId")
-
-    let where = {}
-    if (session.user.role === "GUIDE") {
-      // Guides can see bookings for their tours
-      where = {
-        tour: {
-          guideId: session.user.id,
-        },
-      }
-    } else {
-      // Tourists can see their own bookings
-      where = {
-        touristId: session.user.id,
-      }
-    }
-
-    // Add additional filters if provided
-    if (tourId) {
-      where = { ...where, tourId }
-    }
-    if (userId) {
-      where = { ...where, touristId: userId }
-    }
-
     const bookings = await prisma.booking.findMany({
-      where,
+      where: {
+        touristId: session.user.id,
+      },
       include: {
-        tour: true,
-        tourist: {
+        tour: {
           select: {
-            id: true,
-            name: true,
-            email: true,
+            title: true,
+            guide: {
+              select: {
+                name: true,
+              },
+            },
           },
         },
       },
