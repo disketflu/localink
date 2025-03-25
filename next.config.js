@@ -4,9 +4,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'romesite.fr',
+        hostname: '**',
         port: '',
-        pathname: '/images/**',
+        pathname: '**',
       },
     ],
   },

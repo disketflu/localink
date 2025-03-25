@@ -6,6 +6,28 @@ import Link from "next/link"
 import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 
+interface Profile {
+  bio: string | null
+  location: string | null
+  languages: string[]
+  expertise: string[]
+}
+
+interface User {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
+  role: "TOURIST" | "GUIDE"
+  profile: Profile | null
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: User
+  }
+}
+
 interface Booking {
   id: string
   date: string
@@ -26,6 +48,7 @@ interface Review {
   comment: string
   createdAt: string
   tour: {
+    id: string
     title: string
   }
 }
@@ -41,22 +64,31 @@ export default function TouristDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bookingsResponse, reviewsResponse] = await Promise.all([
+        const [bookingsResponse, reviewsResponse, profileResponse] = await Promise.all([
           fetch("/api/bookings"),
           fetch("/api/reviews?touristId=" + session?.user?.id),
+          fetch("/api/profile"),
         ])
 
-        if (!bookingsResponse.ok || !reviewsResponse.ok) {
+        if (!bookingsResponse.ok || !reviewsResponse.ok || !profileResponse.ok) {
           throw new Error("Failed to fetch data")
         }
 
-        const [bookingsData, reviewsData] = await Promise.all([
+        const [bookingsData, reviewsData, profileData] = await Promise.all([
           bookingsResponse.json(),
           reviewsResponse.json(),
+          profileResponse.json(),
         ])
 
         setBookings(bookingsData)
         setReviews(reviewsData)
+        // Update session with profile data
+        if (session) {
+          session.user = {
+            ...session.user,
+            ...profileData,
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load dashboard")
       } finally {
@@ -71,9 +103,10 @@ export default function TouristDashboard() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     )
@@ -81,16 +114,14 @@ export default function TouristDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-red-600">{error}</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-red-600">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-white py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
@@ -209,17 +240,22 @@ export default function TouristDashboard() {
                                           "Content-Type": "application/json",
                                         },
                                         body: JSON.stringify({
-                                          status: "CANCELLED",
-                                        }),
+                                          status: "CANCELLED"
+                                        })
                                       }
                                     )
                                     if (!response.ok) {
-                                      throw new Error("Failed to cancel booking")
+                                      const error = await response.text()
+                                      throw new Error(error || "Failed to cancel booking")
                                     }
-                                    // Refresh the page to show updated status
-                                    window.location.reload()
+                                    // Refresh the data instead of the whole page
+                                    const updatedBookings = bookings.map(b => 
+                                      b.id === booking.id ? { ...b, status: "CANCELLED" } : b
+                                    )
+                                    setBookings(updatedBookings)
                                   } catch (err) {
                                     console.error("Error cancelling booking:", err)
+                                    setError(err instanceof Error ? err.message : "Failed to cancel booking")
                                   }
                                 }
                               }}
@@ -228,7 +264,7 @@ export default function TouristDashboard() {
                               Cancel
                             </button>
                           )}
-                          {booking.status === "CONFIRMED" && (
+                          {booking.status === "COMPLETED" && !reviews.some(r => r.tour.id === booking.tour.id) && (
                             <Link
                               href={`/tours/${booking.tour.id}/review`}
                               className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
@@ -289,13 +325,34 @@ export default function TouristDashboard() {
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
                   Profile Information
                 </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Your personal information and preferences
+                </p>
               </div>
               <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <dt className="text-sm font-medium text-gray-500">Profile Picture</dt>
+                    <dd className="mt-2 flex items-center">
+                      {session?.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "Profile"}
+                          width={96}
+                          height={96}
+                          className="rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      )}
+                    </dd>
+                  </div>
                   <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-gray-500">Name</dt>
                     <dd className="mt-1 text-sm text-gray-900">
-                      {session?.user?.name}
+                      {session?.user?.name || "Not provided"}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
@@ -305,21 +362,23 @@ export default function TouristDashboard() {
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Profile Picture</dt>
-                    <dd className="mt-1">
-                      {session?.user?.image ? (
-                        <Image
-                          src={session.user.image}
-                          alt="Profile"
-                          width={48}
-                          height={48}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No image</span>
-                        </div>
-                      )}
+                    <dt className="text-sm font-medium text-gray-500">Bio</dt>
+                    <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                      {session?.user?.profile?.bio || "No bio provided"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm font-medium text-gray-500">Location</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {session?.user?.profile?.location || "Not specified"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm font-medium text-gray-500">Languages</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {session?.user?.profile?.languages?.length > 0
+                        ? session.user.profile.languages.join(", ")
+                        : "None specified"}
                     </dd>
                   </div>
                 </dl>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import { db } from "@/lib/db"
+import prisma from "@/lib/prisma"
 
 export async function PATCH(
   request: Request,
@@ -17,13 +17,6 @@ export async function PATCH(
       )
     }
 
-    if (session.user.role !== "GUIDE") {
-      return NextResponse.json(
-        { error: "Only guides can update booking status" },
-        { status: 403 }
-      )
-    }
-
     const { status } = await request.json()
 
     if (!status || !["CONFIRMED", "CANCELLED", "COMPLETED"].includes(status)) {
@@ -33,16 +26,14 @@ export async function PATCH(
       )
     }
 
-    // Check if the booking exists and belongs to the guide
-    const booking = await db.booking.findFirst({
+    // Find the booking with tour and tourist information
+    const booking = await prisma.booking.findFirst({
       where: {
         id: params.id,
-        tour: {
-          guideId: session.user.id,
-        },
       },
       include: {
         tour: true,
+        tourist: true,
       },
     })
 
@@ -51,6 +42,52 @@ export async function PATCH(
         { error: "Booking not found" },
         { status: 404 }
       )
+    }
+
+    // Check permissions based on role and status update
+    if (session.user.role === "GUIDE") {
+      // Guide can only update bookings for their own tours
+      if (booking.tour.guideId !== session.user.id) {
+        return NextResponse.json(
+          { error: "You can only update bookings for your own tours" },
+          { status: 403 }
+        )
+      }
+      // Guide can confirm or complete bookings
+      if (status === "CANCELLED") {
+        return NextResponse.json(
+          { error: "Guides cannot cancel bookings" },
+          { status: 403 }
+        )
+      }
+      // Guide can only complete confirmed bookings
+      if (status === "COMPLETED" && booking.status !== "CONFIRMED") {
+        return NextResponse.json(
+          { error: "Only confirmed bookings can be marked as completed" },
+          { status: 400 }
+        )
+      }
+    } else if (session.user.role === "TOURIST") {
+      // Tourist can only update their own bookings
+      if (booking.touristId !== session.user.id) {
+        return NextResponse.json(
+          { error: "You can only update your own bookings" },
+          { status: 403 }
+        )
+      }
+      // Tourist can only cancel pending bookings
+      if (status !== "CANCELLED") {
+        return NextResponse.json(
+          { error: "Tourists can only cancel bookings" },
+          { status: 403 }
+        )
+      }
+      if (booking.status !== "PENDING") {
+        return NextResponse.json(
+          { error: "Only pending bookings can be cancelled" },
+          { status: 400 }
+        )
+      }
     }
 
     // Check if the status transition is valid
@@ -63,7 +100,7 @@ export async function PATCH(
 
     if (status === "CONFIRMED") {
       // Check if there are any existing confirmed bookings for this tour on this date
-      const existingBookings = await db.booking.count({
+      const existingBookings = await prisma.booking.count({
         where: {
           tourId: booking.tour.id,
           date: booking.date,
@@ -83,7 +120,7 @@ export async function PATCH(
     }
 
     // Update the booking status
-    const updatedBooking = await db.booking.update({
+    const updatedBooking = await prisma.booking.update({
       where: {
         id: params.id,
       },

@@ -11,6 +11,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    if (session.user.role !== "TOURIST") {
+      return NextResponse.json({ error: "Only tourists can create bookings" }, { status: 403 })
+    }
+
     const body = await request.json()
     const sanitizedBody = sanitizeObject(body)
 
@@ -58,6 +62,22 @@ export async function POST(request: Request) {
       )
     }
 
+    // Check if the tour is already fully booked for this date
+    const confirmedBookings = await prisma.booking.count({
+      where: {
+        tourId,
+        date: bookingDate,
+        status: "CONFIRMED",
+      },
+    })
+
+    if (confirmedBookings >= tour.maxGroupSize) {
+      return NextResponse.json(
+        { error: "This tour is fully booked for the selected date" },
+        { status: 400 }
+      )
+    }
+
     // Create booking
     const booking = await prisma.booking.create({
       data: {
@@ -86,8 +106,9 @@ export async function POST(request: Request) {
     return NextResponse.json(booking)
   } catch (error) {
     console.error("Error creating booking:", error)
+    const errorMessage = error instanceof Error ? error.message : "Failed to create booking"
     return NextResponse.json(
-      { error: "Failed to create booking" },
+      { error: errorMessage },
       { status: 500 }
     )
   }

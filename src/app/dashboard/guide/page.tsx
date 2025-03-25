@@ -6,6 +6,28 @@ import Link from "next/link"
 import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 
+interface Profile {
+  bio: string | null
+  location: string | null
+  languages: string[]
+  expertise: string[]
+}
+
+interface User {
+  id: string
+  name: string | null
+  email: string
+  image: string | null
+  role: "TOURIST" | "GUIDE"
+  profile: Profile
+}
+
+declare module "next-auth" {
+  interface Session {
+    user: User
+  }
+}
+
 interface Tour {
   id: string
   title: string
@@ -25,6 +47,7 @@ interface Booking {
   date: string
   status: string
   tourist: {
+    id: string
     name: string
     email: string
   }
@@ -42,6 +65,11 @@ interface Review {
   createdAt: string
   author: {
     name: string
+    image: string | null
+  }
+  tour: {
+    id: string
+    title: string
   }
 }
 
@@ -58,6 +86,7 @@ export default function GuideDashboard() {
   const [error, setError] = useState("")
   const [tours, setTours] = useState<Tour[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [reviews, setReviews] = useState<Review[]>([])
   const [earnings, setEarnings] = useState<Earnings>({
     total: 0,
     completed: 0,
@@ -69,26 +98,39 @@ export default function GuideDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [toursResponse, bookingsResponse] = await Promise.all([
+        const [toursResponse, bookingsResponse, reviewsResponse, profileResponse] = await Promise.all([
           fetch("/api/tours?guideId=" + session?.user?.id),
           fetch("/api/bookings?guideId=" + session?.user?.id),
+          fetch("/api/reviews?guideId=" + session?.user?.id),
+          fetch("/api/profile"),
         ])
 
-        if (!toursResponse.ok || !bookingsResponse.ok) {
+        if (!toursResponse.ok || !bookingsResponse.ok || !reviewsResponse.ok || !profileResponse.ok) {
           throw new Error("Failed to fetch data")
         }
 
-        const [toursData, bookingsData] = await Promise.all([
+        const [toursData, bookingsData, reviewsData, profileData] = await Promise.all([
           toursResponse.json(),
           bookingsResponse.json(),
+          reviewsResponse.json(),
+          profileResponse.json(),
         ])
 
         setTours(toursData)
         setBookings(bookingsData)
+        setReviews(reviewsData)
+
+        // Update session with profile data
+        if (session) {
+          session.user = {
+            ...session.user,
+            ...profileData,
+          }
+        }
 
         // Calculate earnings
         const earningsData = bookingsData.reduce(
-          (acc: Earnings, booking: any) => {
+          (acc: Earnings, booking: Booking) => {
             if (booking.status === "COMPLETED") {
               acc.completed += booking.tour.price
             } else if (booking.status === "PENDING") {
@@ -117,9 +159,10 @@ export default function GuideDashboard() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -127,10 +170,8 @@ export default function GuideDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-red-600">{error}</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-red-600">{error}</div>
       </div>
     )
   }
@@ -368,6 +409,8 @@ export default function GuideDashboard() {
                                 ? "bg-yellow-100 text-yellow-800"
                                 : booking.status === "CANCELLED"
                                 ? "bg-red-100 text-red-800"
+                                : booking.status === "COMPLETED"
+                                ? "bg-blue-100 text-blue-800"
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
@@ -386,23 +429,65 @@ export default function GuideDashboard() {
                                           "Content-Type": "application/json",
                                         },
                                         body: JSON.stringify({
-                                          status: "CONFIRMED",
-                                        }),
+                                          status: "CONFIRMED"
+                                        })
                                       }
                                     )
                                     if (!response.ok) {
-                                      throw new Error("Failed to confirm booking")
+                                      const error = await response.text()
+                                      throw new Error(error || "Failed to confirm booking")
                                     }
-                                    // Refresh the page to show updated status
-                                    window.location.reload()
+                                    // Refresh the data instead of the whole page
+                                    const updatedBookings = bookings.map(b => 
+                                      b.id === booking.id ? { ...b, status: "CONFIRMED" } : b
+                                    )
+                                    setBookings(updatedBookings)
                                   } catch (err) {
                                     console.error("Error confirming booking:", err)
+                                    setError(err instanceof Error ? err.message : "Failed to confirm booking")
                                   }
                                 }
                               }}
                               className="text-sm font-medium text-green-600 hover:text-green-500"
                             >
                               Confirm
+                            </button>
+                          )}
+                          {booking.status === "CONFIRMED" && (
+                            <button
+                              onClick={async () => {
+                                if (confirm("Are you sure you want to mark this booking as completed?")) {
+                                  try {
+                                    const response = await fetch(
+                                      `/api/bookings/${booking.id}`,
+                                      {
+                                        method: "PATCH",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          status: "COMPLETED"
+                                        })
+                                      }
+                                    )
+                                    if (!response.ok) {
+                                      const error = await response.text()
+                                      throw new Error(error || "Failed to complete booking")
+                                    }
+                                    // Refresh the data instead of the whole page
+                                    const updatedBookings = bookings.map(b => 
+                                      b.id === booking.id ? { ...b, status: "COMPLETED" } : b
+                                    )
+                                    setBookings(updatedBookings)
+                                  } catch (err) {
+                                    console.error("Error completing booking:", err)
+                                    setError(err instanceof Error ? err.message : "Failed to complete booking")
+                                  }
+                                }
+                              }}
+                              className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                            >
+                              Mark as Completed
                             </button>
                           )}
                         </div>
@@ -417,19 +502,42 @@ export default function GuideDashboard() {
           {activeTab === "reviews" && (
             <div className="overflow-hidden bg-white shadow sm:rounded-md">
               <ul className="divide-y divide-gray-200">
-                {tours.flatMap((tour) =>
-                  tour.reviews?.map((review) => (
+                {reviews.length === 0 ? (
+                  <li className="px-4 py-5 sm:px-6">
+                    <div className="text-center text-gray-500">
+                      No reviews yet for your tours.
+                    </div>
+                  </li>
+                ) : (
+                  reviews.map((review) => (
                     <li key={review.id}>
                       <div className="px-4 py-4 sm:px-6">
                         <div className="flex items-center justify-between">
                           <div>
                             <h4 className="text-sm font-medium text-gray-900">
-                              {tour.title}
+                              {review.tour.title}
                             </h4>
-                            <p className="text-sm text-gray-500">
-                              By {review.author.name}
-                            </p>
                             <div className="mt-1 flex items-center">
+                              <div className="flex items-center">
+                                {review.author.image ? (
+                                  <Image
+                                    src={review.author.image}
+                                    alt={review.author.name}
+                                    width={24}
+                                    height={24}
+                                    className="rounded-full mr-2"
+                                  />
+                                ) : (
+                                  <div className="h-6 w-6 rounded-full bg-gray-200 flex items-center justify-center mr-2">
+                                    <span className="text-xs text-gray-500">
+                                      {review.author.name.charAt(0)}
+                                    </span>
+                                  </div>
+                                )}
+                                <span className="text-sm text-gray-600 mr-2">
+                                  {review.author.name}
+                                </span>
+                              </div>
                               {[1, 2, 3, 4, 5].map((value) => (
                                 <StarIcon
                                   key={value}
@@ -463,13 +571,34 @@ export default function GuideDashboard() {
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
                   Guide Profile
                 </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Your professional information and expertise
+                </p>
               </div>
               <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                  <div className="sm:col-span-2">
+                    <dt className="text-sm font-medium text-gray-500">Profile Picture</dt>
+                    <dd className="mt-2 flex items-center">
+                      {session?.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "Profile"}
+                          width={96}
+                          height={96}
+                          className="rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                          <span className="text-gray-400">No image</span>
+                        </div>
+                      )}
+                    </dd>
+                  </div>
                   <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-gray-500">Name</dt>
                     <dd className="mt-1 text-sm text-gray-900">
-                      {session?.user?.name}
+                      {session?.user?.name || "Not provided"}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
@@ -479,28 +608,38 @@ export default function GuideDashboard() {
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Profile Picture</dt>
-                    <dd className="mt-1">
-                      {session?.user?.image ? (
-                        <Image
-                          src={session.user.image}
-                          alt="Profile"
-                          width={48}
-                          height={48}
-                          className="rounded-full"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No image</span>
-                        </div>
-                      )}
+                    <dt className="text-sm font-medium text-gray-500">Bio</dt>
+                    <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
+                      {session?.user?.profile?.bio || "No bio provided"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm font-medium text-gray-500">Location</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {session?.user?.profile?.location || "Not specified"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
+                    <dt className="text-sm font-medium text-gray-500">Languages</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {session?.user?.profile?.languages?.length > 0
+                        ? session.user.profile.languages.join(", ")
+                        : "None specified"}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
+                    <dt className="text-sm font-medium text-gray-500">Areas of Expertise</dt>
+                    <dd className="mt-1 text-sm text-gray-900">
+                      {session?.user?.profile?.expertise?.length > 0
+                        ? session.user.profile.expertise.join(", ")
+                        : "None specified"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-gray-500">Total Tours</dt>
                     <dd className="mt-1 text-sm text-gray-900">{tours.length}</dd>
                   </div>
-                  <div className="sm:col-span-2">
+                  <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-gray-500">Total Bookings</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {tours.reduce((acc, tour) => acc + tour.bookings.length, 0)}

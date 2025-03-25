@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { Input, Textarea } from "@/components/ui/Input"
 
 export default function CreateTourPage() {
   const router = useRouter()
@@ -12,7 +13,7 @@ export default function CreateTourPage() {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
@@ -113,10 +114,10 @@ export default function CreateTourPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-sm rounded-lg p-6">
+        <div className="bg-white shadow-sm rounded-lg p-8">
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 mb-8">Create New Tour</h1>
           
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                 {error}
@@ -124,140 +125,104 @@ export default function CreateTourPage() {
             )}
 
             <div className="space-y-6">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                  Tour Title
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  id="title"
-                  required
-                  placeholder="Enter a descriptive title for your tour"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
+              <Input
+                label="Tour Title"
+                type="text"
+                name="title"
+                id="title"
+                required
+                placeholder="Enter a descriptive title for your tour"
+                helperText="Make it catchy and descriptive"
+              />
 
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  id="description"
-                  rows={4}
-                  required
-                  placeholder="Describe your tour in detail..."
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
+              <Textarea
+                label="Description"
+                name="description"
+                id="description"
+                rows={4}
+                required
+                placeholder="Describe your tour in detail..."
+                helperText="Minimum 50 characters. Include key highlights and what makes your tour unique."
+              />
 
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  id="location"
-                  required
-                  placeholder="Enter the tour location"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
+              <Input
+                label="Location"
+                type="text"
+                name="location"
+                id="location"
+                required
+                placeholder="Enter the tour location"
+                helperText="Be specific about the city/region"
+              />
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                    Price (USD)
-                  </label>
-                  <div className="relative rounded-lg shadow-sm">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <span className="text-gray-500 sm:text-sm">$</span>
-                    </div>
-                    <input
-                      type="number"
-                      name="price"
-                      id="price"
-                      min="0"
-                      step="0.01"
-                      required
-                      placeholder="0.00"
-                      className="block w-full rounded-lg border-gray-300 pl-7 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="duration" className="block text-sm font-medium text-gray-700 mb-1">
-                    Duration (hours)
-                  </label>
-                  <input
-                    type="number"
-                    name="duration"
-                    id="duration"
-                    min="1"
-                    required
-                    placeholder="Enter duration"
-                    className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="maxGroupSize" className="block text-sm font-medium text-gray-700 mb-1">
-                  Maximum Group Size
-                </label>
-                <input
+                <Input
+                  label="Price (USD)"
                   type="number"
-                  name="maxGroupSize"
-                  id="maxGroupSize"
+                  name="price"
+                  id="price"
+                  min="0"
+                  step="0.01"
+                  required
+                  placeholder="0.00"
+                  helperText="Set a competitive price"
+                />
+
+                <Input
+                  label="Duration (hours)"
+                  type="number"
+                  name="duration"
+                  id="duration"
                   min="1"
                   required
-                  placeholder="Enter maximum group size"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Enter duration"
+                  helperText="Total tour duration"
                 />
               </div>
 
-              <div>
-                <label htmlFor="included" className="block text-sm font-medium text-gray-700 mb-1">
-                  What&apos;s Included
-                </label>
-                <input
-                  type="text"
-                  name="included"
-                  id="included"
-                  placeholder="e.g., Guide, Transportation, Snacks (comma-separated)"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
+              <Input
+                label="Maximum Group Size"
+                type="number"
+                name="maxGroupSize"
+                id="maxGroupSize"
+                min="1"
+                required
+                placeholder="Enter maximum group size"
+                helperText="Consider the optimal group size for the best experience"
+              />
 
-              <div>
-                <label htmlFor="imageUrl" className="block text-sm font-medium text-gray-700 mb-1">
-                  Image URL
-                </label>
-                <input
-                  type="url"
-                  name="imageUrl"
-                  id="imageUrl"
-                  placeholder="https://example.com/tour-image.jpg"
-                  className="block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                />
-              </div>
+              <Input
+                label="What's Included"
+                type="text"
+                name="included"
+                id="included"
+                required
+                placeholder="e.g., Guide, Transportation, Snacks"
+                helperText="Separate items with commas"
+              />
+
+              <Input
+                label="Image URL"
+                type="url"
+                name="imageUrl"
+                id="imageUrl"
+                placeholder="https://example.com/tour-image.jpg"
+                helperText="Add a representative image of your tour (optional)"
+              />
             </div>
 
-            <div className="flex justify-end space-x-4 pt-4">
+            <div className="flex justify-end space-x-4 pt-6">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+                className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? "Creating..." : "Create Tour"}
               </button>

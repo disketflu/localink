@@ -23,7 +23,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.className} bg-white`}>
         <Providers>
           <nav className="bg-white shadow-sm relative z-50">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -44,7 +44,7 @@ export default async function RootLayout({
                     >
                       Browse Tours
                     </Link>
-                    {session?.user.role === "GUIDE" && (
+                    {session?.user && (
                       <Link
                         href="/dashboard"
                         className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors relative z-10"

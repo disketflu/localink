@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { use } from "react"
+import { Input, Textarea } from "@/components/ui/Input"
 
 interface Tour {
   id: string
@@ -84,8 +85,14 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
-          includedItems,
+          title: formData.title,
+          description: formData.description,
+          location: formData.location,
+          price: parseFloat(formData.price),
+          duration: parseInt(formData.duration),
+          maxGroupSize: parseInt(formData.maxGroupSize),
+          included: includedItems,
+          imageUrl: formData.imageUrl,
         }),
       })
 
@@ -105,9 +112,10 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
 
   if (status === "loading" || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     )
@@ -118,219 +126,141 @@ export default function EditTourPage({ params }: { params: Promise<{ id: string 
     return null
   }
 
-  if (error || !tour) {
+  if (error && !tour) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-red-600">{error || "Tour not found"}</div>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center text-red-600">
+          {error || "Tour not found"}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl">
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
-                Edit Tour
-              </h3>
-              <div className="mt-2 max-w-xl text-sm text-gray-500">
-                <p>Update your tour details below.</p>
+    <div className="min-h-screen bg-gray-50 py-10">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+        <div className="bg-white shadow-sm rounded-lg p-8">
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 mb-8">Edit Tour</h1>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-6">
+              <Input
+                label="Tour Title"
+                type="text"
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                required
+                placeholder="Enter a descriptive title for your tour"
+                helperText="Make it catchy and descriptive"
+              />
+
+              <Textarea
+                label="Description"
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                required
+                placeholder="Describe your tour in detail..."
+                helperText="Minimum 50 characters. Include key highlights and what makes your tour unique."
+              />
+
+              <Input
+                label="Location"
+                type="text"
+                id="location"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                required
+                placeholder="Enter the tour location"
+                helperText="Be specific about the city/region"
+              />
+
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <Input
+                  label="Price (USD)"
+                  type="number"
+                  id="price"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  min="0"
+                  step="0.01"
+                  required
+                  placeholder="0.00"
+                  helperText="Set a competitive price"
+                />
+
+                <Input
+                  label="Duration (hours)"
+                  type="number"
+                  id="duration"
+                  value={formData.duration}
+                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  min="1"
+                  required
+                  placeholder="Enter duration"
+                  helperText="Total tour duration"
+                />
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-5 space-y-6">
-                <div>
-                  <label
-                    htmlFor="title"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData({ ...formData, title: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    required
-                  />
-                </div>
+              <Input
+                label="Maximum Group Size"
+                type="number"
+                id="maxGroupSize"
+                value={formData.maxGroupSize}
+                onChange={(e) => setFormData({ ...formData, maxGroupSize: e.target.value })}
+                min="1"
+                required
+                placeholder="Enter maximum group size"
+                helperText="Consider the optimal group size for the best experience"
+              />
 
-                <div>
-                  <label
-                    htmlFor="description"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    required
-                  />
-                </div>
+              <Input
+                label="What's Included"
+                type="text"
+                id="includedItems"
+                value={formData.includedItems}
+                onChange={(e) => setFormData({ ...formData, includedItems: e.target.value })}
+                required
+                placeholder="e.g., Guide, Transportation, Snacks"
+                helperText="Separate items with commas"
+              />
 
-                <div>
-                  <label
-                    htmlFor="location"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    id="location"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="price"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Price (per person)
-                  </label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">$</span>
-                    </div>
-                    <input
-                      type="number"
-                      id="price"
-                      value={formData.price}
-                      onChange={(e) =>
-                        setFormData({ ...formData, price: e.target.value })
-                      }
-                      className="mt-1 block w-full pl-7 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      min="0"
-                      step="0.01"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="duration"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Duration (hours)
-                    </label>
-                    <input
-                      type="number"
-                      id="duration"
-                      value={formData.duration}
-                      onChange={(e) =>
-                        setFormData({ ...formData, duration: e.target.value })
-                      }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      min="1"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="maxGroupSize"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Max Group Size
-                    </label>
-                    <input
-                      type="number"
-                      id="maxGroupSize"
-                      value={formData.maxGroupSize}
-                      onChange={(e) =>
-                        setFormData({ ...formData, maxGroupSize: e.target.value })
-                      }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      min="1"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="includedItems"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Included Items (comma-separated)
-                  </label>
-                  <input
-                    type="text"
-                    id="includedItems"
-                    value={formData.includedItems}
-                    onChange={(e) =>
-                      setFormData({ ...formData, includedItems: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="e.g., Transportation, Lunch, Guide"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="imageUrl"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Image URL
-                  </label>
-                  <input
-                    type="url"
-                    id="imageUrl"
-                    value={formData.imageUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, imageUrl: e.target.value })
-                    }
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-
-                {error && (
-                  <div className="text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
-
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/dashboard")}
-                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {saving ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </form>
+              <Input
+                label="Image URL"
+                type="url"
+                id="imageUrl"
+                value={formData.imageUrl}
+                onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                placeholder="https://example.com/tour-image.jpg"
+                helperText="Add a representative image of your tour (optional)"
+              />
             </div>
-          </div>
+
+            <div className="flex justify-end space-x-4 pt-6">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
