@@ -1,36 +1,122 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Localink - Local Tour Guide Platform
+
+Localink is a modern web application that connects local tour guides with tourists, enabling authentic and personalized travel experiences. Built with Next.js, TypeScript, and Prisma, it offers a seamless platform for tour booking, management, and review.
+
+## Features
+
+- 🔐 Secure authentication system with NextAuth.js
+- 👥 User roles: Tourists, Guides, and Admins
+- 🗺️ Tour creation and management
+- 📅 Booking system with status tracking
+- ⭐ Review and rating system
+- 👤 User profiles with expertise and language preferences
+- 🎨 Modern UI with Tailwind CSS
+- 📱 Responsive design
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js
+- **Form Handling**: React Hook Form with Zod validation
+- **Icons**: Heroicons
+- **Date Handling**: date-fns
+- **HTTP Client**: Axios
+
+## Prerequisites
+
+- Node.js 18+ 
+- PostgreSQL database
+- npm or yarn package manager
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/localink.git
+cd localink
+```
 
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/localink"
+NEXTAUTH_SECRET="your-secret-key"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+4. Set up the database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The application will be available at `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+localink/
+├── src/
+│   ├── app/                    # Next.js app directory
+│   │   ├── api/               # API routes
+│   │   ├── auth/              # Authentication pages
+│   │   ├── dashboard/         # User dashboard
+│   │   ├── tours/             # Tour-related pages
+│   │   └── layout.tsx         # Root layout
+│   ├── components/            # Reusable components
+│   ├── lib/                   # Utility functions
+│   └── types/                 # TypeScript types
+├── prisma/
+│   └── schema.prisma          # Database schema
+├── public/                    # Static assets
+└── package.json              # Project dependencies
+```
 
-## Learn More
+## Database Schema
 
-To learn more about Next.js, take a look at the following resources:
+The application uses the following main models:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **User**: Stores user information and authentication details
+- **Profile**: Contains additional user information like bio and expertise
+- **Tour**: Represents tour offerings with details like price and duration
+- **Booking**: Manages tour bookings and their status
+- **Review**: Handles tour reviews and ratings
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Available Scripts
 
-## Deploy on Vercel
+- `npm run dev`: Start development server with Turbopack
+- `npm run build`: Build the application for production
+- `npm run start`: Start the production server
+- `npm run lint`: Run ESLint for code linting
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the maintainers.
