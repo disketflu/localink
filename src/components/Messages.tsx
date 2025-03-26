@@ -268,7 +268,7 @@ function ChatWindow({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder={t('input.placeholder')}
-            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             type="submit"

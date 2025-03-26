@@ -227,8 +227,7 @@
       "languages": "Maximum 5 languages allowed",
       "expertise": "Maximum 5 expertise entries allowed",
       "image": {
-        "invalid": "Invalid image URL",
-        "type": "Invalid image type. Allowed types: JPEG, PNG, WebP"
+        "invalid": "Invalid image URL"
       }
     }
   },

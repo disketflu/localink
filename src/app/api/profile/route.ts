@@ -6,7 +6,6 @@ import { sanitizeObject } from "@/lib/utils"
 
 const MAX_BIO_LENGTH = 500
 const MAX_NAME_LENGTH = 50
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_LANGUAGES = 5
 const MAX_EXPERTISE = 5
 
@@ -70,17 +69,10 @@ export async function PUT(request: Request) {
       )
     }
 
-    // Validate image URL and type
+    // Validate image URL
     if (image) {
       try {
-        const imageUrl = new URL(image)
-        const imageType = imageUrl.pathname.split('.').pop()?.toLowerCase()
-        if (!imageType || !ALLOWED_IMAGE_TYPES.includes(`image/${imageType}`)) {
-          return NextResponse.json(
-            { error: "Invalid image type. Allowed types: JPEG, PNG, WebP" },
-            { status: 400 }
-          )
-        }
+        new URL(image)
       } catch {
         return NextResponse.json(
           { error: "Invalid image URL" },
