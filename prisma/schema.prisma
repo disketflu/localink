@@ -29,6 +29,7 @@ model User {
   bookings      Booking[] @relation("Tourist")
   reviews       Review[]  @relation("ReviewAuthor")
   receivedReviews Review[] @relation("ReviewedGuide")
+  messages      Message[]
 }
 
 model Profile {
@@ -71,6 +72,7 @@ model Booking {
   tour      Tour     @relation(fields: [tourId], references: [id])
   touristId String
   tourist   User     @relation("Tourist", fields: [touristId], references: [id])
+  messages  Message[]
 }
 
 model Review {
@@ -86,6 +88,19 @@ model Review {
   author    User     @relation("ReviewAuthor", fields: [authorId], references: [id])
   guideId   String
   guide     User     @relation("ReviewedGuide", fields: [guideId], references: [id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  @@index([bookingId])
 }
 
 enum Role {

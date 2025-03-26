@@ -4,11 +4,9 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { use } from "react"
-import { format } from "date-fns"
 import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 import ReviewForm from "@/components/ReviewForm"
-import ReviewList from "@/components/ReviewList"
 import { Input } from "@/components/ui/Input"
 
 interface Tour {
@@ -38,17 +36,6 @@ interface Tour {
   }[]
 }
 
-interface Review {
-  id: string
-  rating: number
-  comment: string
-  createdAt: string
-  author: {
-    name: string
-    image: string | null
-  }
-}
-
 interface Booking {
   id: string
   tourId: string
@@ -59,7 +46,7 @@ interface Booking {
 
 export default function TourDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -72,30 +59,28 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [tourResponse, bookingsResponse] = await Promise.all([
-          fetch(`/api/tours/${resolvedParams.id}`),
-          fetch("/api/bookings"),
-        ])
-
-        if (!tourResponse.ok || !bookingsResponse.ok) {
-          throw new Error("Failed to fetch data")
+        const tourResponse = await fetch(`/api/tours/${resolvedParams.id}`)
+        if (!tourResponse.ok) {
+          throw new Error("Failed to fetch tour data")
         }
-
-        const [tourData, bookingsData] = await Promise.all([
-          tourResponse.json(),
-          bookingsResponse.json(),
-        ])
-
+        const tourData = await tourResponse.json()
         setTour(tourData)
-        
-        // Find user's completed booking for this tour
-        const userBooking = bookingsData.find(
-          (booking: Booking) =>
-            booking.tourId === resolvedParams.id &&
-            booking.touristId === session?.user?.id &&
-            booking.status === "COMPLETED"
-        )
-        setUserBooking(userBooking)
+
+        // Only fetch bookings if user is authenticated
+        if (session?.user) {
+          const bookingsResponse = await fetch("/api/bookings")
+          if (bookingsResponse.ok) {
+            const bookingsData = await bookingsResponse.json()
+            // Find user's completed booking for this tour
+            const userBooking = bookingsData.find(
+              (booking: Booking) =>
+                booking.tourId === resolvedParams.id &&
+                booking.touristId === session.user.id &&
+                booking.status === "COMPLETED"
+            )
+            setUserBooking(userBooking)
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load tour details")
       } finally {
@@ -103,10 +88,8 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
       }
     }
 
-    if (status === "authenticated") {
-      fetchData()
-    }
-  }, [resolvedParams.id, status, session?.user?.id])
+    fetchData()
+  }, [resolvedParams.id, session?.user])
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -203,7 +186,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold text-gray-900">What's included</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">What&apos;s included</h2>
                   <ul className="mt-4 space-y-2">
                     {tour.included.map((item, index) => (
                       <li key={index} className="flex items-center text-gray-600">
@@ -214,48 +197,6 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
                       </li>
                     ))}
                   </ul>
-                </div>
-
-                <div className="mt-8">
-                  <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
-                  <div className="mt-4 space-y-6">
-                    {reviews.length === 0 ? (
-                      <p className="text-gray-500">No reviews yet</p>
-                    ) : (
-                      reviews.map((review) => (
-                        <div key={review.id} className="border-b border-gray-200 pb-6">
-                          <div className="flex items-center">
-                            <img
-                              src={review.author.image}
-                              alt={review.author.name}
-                              className="h-10 w-10 rounded-full"
-                            />
-                            <div className="ml-4">
-                              <p className="text-sm font-medium text-gray-900">{review.author.name}</p>
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <svg
-                                    key={i}
-                                    className={`h-5 w-5 ${
-                                      i < review.rating ? "text-yellow-400" : "text-gray-300"
-                                    }`}
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                ))}
-                              </div>
-                              <p className="mt-2 text-sm text-gray-600">{review.comment}</p>
-                              <p className="mt-1 text-xs text-gray-500">
-                                {format(new Date(review.createdAt), "MMMM d, yyyy")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
                 </div>
               </div>
 
@@ -424,6 +365,25 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 flex items-center">
+          <div className="flex items-center">
+            {[0, 1, 2, 3, 4].map((rating) => (
+              <StarIcon
+                key={rating}
+                className={`h-5 w-5 ${
+                  rating < averageRating
+                    ? "text-yellow-400"
+                    : "text-gray-300"
+                }`}
+                aria-hidden="true"
+              />
+            ))}
+          </div>
+          <p className="ml-2 text-sm text-gray-600">
+            {averageRating.toFixed(1)} out of 5 ({reviews.length} reviews)
+          </p>
         </div>
       </div>
     </div>

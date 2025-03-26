@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react"
 import Link from "next/link"
 import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
+import Messages from "@/components/Messages"
 
 interface Profile {
   bio: string | null
@@ -248,6 +249,16 @@ export default function GuideDashboard() {
               Bookings
             </button>
             <button
+              onClick={() => setActiveTab("messages")}
+              className={`${
+                activeTab === "messages"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+              } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
+            >
+              Messages
+            </button>
+            <button
               onClick={() => setActiveTab("reviews")}
               className={`${
                 activeTab === "reviews"
@@ -363,6 +374,10 @@ export default function GuideDashboard() {
                 </div>
               ))}
             </div>
+          )}
+
+          {activeTab === "messages" && (
+            <Messages bookings={bookings} />
           )}
 
           {activeTab === "bookings" && (

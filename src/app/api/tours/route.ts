@@ -33,15 +33,38 @@ export async function GET(req: Request) {
 
     // For all other cases (unauthenticated or tourists), return all tours
     const tours = await db.tour.findMany({
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        location: true,
+        price: true,
+        duration: true,
+        maxGroupSize: true,
+        imageUrl: true,
         guide: {
           select: {
+            id: true,
             name: true,
+            image: true,
           },
         },
         reviews: {
           select: {
             rating: true,
+            comment: true,
+            createdAt: true,
+            author: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            bookings: true,
           },
         },
       },
