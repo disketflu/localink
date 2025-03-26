@@ -1,0 +1,444 @@
+{
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "french": "French"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "browseTours": "Browse Tours",
+    "dashboard": "Dashboard",
+    "login": "Log in",
+    "signup": "Sign up",
+    "welcome": "Welcome, {name}"
+  },
+  "landing": {
+    "hero": {
+      "title": "Discover Local Experiences with LocaLink",
+      "description": "Connect with local guides who know their cities inside out. Experience authentic travel, create unforgettable memories, and explore like a local.",
+      "cta": {
+        "getStarted": "Get started",
+        "dashboard": "Go to Dashboard",
+        "browseTours": "Browse tours"
+      }
+    },
+    "features": {
+      "title": "Travel Better",
+      "subtitle": "Everything you need for an authentic travel experience",
+      "description": "Connect with experienced local guides, discover hidden gems, and create memories that last a lifetime.",
+      "items": {
+        "expertise": {
+          "title": "Local Expertise",
+          "description": "Connect with guides who know their cities inside out and can show you the hidden gems tourists rarely see."
+        },
+        "personalized": {
+          "title": "Personalized Experiences",
+          "description": "Customize your tours based on your interests and preferences for a truly unique experience."
+        },
+        "secure": {
+          "title": "Secure Booking",
+          "description": "Book with confidence knowing that all our guides are verified and your payments are secure."
+        }
+      }
+    }
+  },
+  "guideDashboard": {
+    "title": "Guide Dashboard",
+    "welcome": "Welcome back, {name}",
+    "createTour": "Create Tour",
+    "earnings": {
+      "total": "Total Earnings",
+      "completed": "Completed Tours",
+      "pending": "Pending Tours",
+      "cancelled": "Cancelled Tours"
+    },
+    "tabs": {
+      "tours": "My Tours",
+      "bookings": "Bookings",
+      "messages": "Messages",
+      "reviews": "Reviews",
+      "profile": "Profile"
+    },
+    "tours": {
+      "noImage": "No image",
+      "bookings": "{count} bookings",
+      "edit": "Edit tour",
+      "delete": "Delete tour",
+      "deleteConfirm": "Are you sure you want to delete this tour?"
+    },
+    "bookings": {
+      "tourist": "Tourist: {name}",
+      "date": "Date: {date}",
+      "status": {
+        "CONFIRMED": "Confirmed",
+        "PENDING": "Pending",
+        "CANCELLED": "Cancelled",
+        "COMPLETED": "Completed"
+      },
+      "confirm": "Confirm booking",
+      "confirmConfirm": "Are you sure you want to confirm this booking?"
+    },
+    "reviews": {
+      "noReviews": "No reviews yet for your tours.",
+      "by": "by {name}",
+      "on": "on {date}"
+    },
+    "profile": {
+      "title": "Guide Profile",
+      "subtitle": "Your professional information and expertise",
+      "profilePicture": "Profile Picture",
+      "name": "Name",
+      "email": "Email",
+      "bio": "Bio",
+      "location": "Location",
+      "languages": "Languages",
+      "expertise": "Areas of Expertise",
+      "totalTours": "Total Tours",
+      "totalBookings": "Total Bookings",
+      "averageRating": "Average Rating",
+      "editProfile": "Edit Profile",
+      "notProvided": "Not provided",
+      "notSpecified": "Not specified",
+      "noneSpecified": "None specified"
+    },
+    "loading": "Loading...",
+    "error": "Failed to load dashboard"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": {
+      "guide": "Chat with your tourists",
+      "tourist": "Chat with your guides"
+    },
+    "noActiveBookings": "No active bookings to chat about",
+    "selectChat": "Select a chat to start messaging",
+    "loading": "Loading messages...",
+    "error": "Failed to load messages",
+    "sendError": "Failed to send message",
+    "input": {
+      "placeholder": "Type your message...",
+      "send": "Send"
+    },
+    "participant": {
+      "guide": "Guide",
+      "tourist": "Tourist"
+    },
+    "anonymous": "Anonymous"
+  },
+  "touristDashboard": {
+    "title": "Tourist Dashboard",
+    "welcome": "Welcome back, {name}",
+    "browseTours": "Browse Tours",
+    "tabs": {
+      "bookings": "My Bookings",
+      "messages": "Messages",
+      "reviews": "My Reviews",
+      "profile": "Profile"
+    },
+    "tours": {
+      "noImage": "No image"
+    },
+    "bookings": {
+      "guide": "Guide: {name}",
+      "date": "Date: {date}",
+      "status": {
+        "CONFIRMED": "Confirmed",
+        "PENDING": "Pending",
+        "CANCELLED": "Cancelled",
+        "COMPLETED": "Completed"
+      },
+      "cancel": "Cancel booking",
+      "cancelConfirm": "Are you sure you want to cancel this booking?",
+      "review": "Review"
+    },
+    "reviews": {
+      "noReviews": "You haven't written any reviews yet."
+    },
+    "profile": {
+      "title": "Profile Information",
+      "subtitle": "Your personal information and preferences",
+      "profilePicture": "Profile Picture",
+      "name": "Name",
+      "email": "Email",
+      "bio": "Bio",
+      "location": "Location",
+      "languages": "Languages",
+      "editProfile": "Edit Profile",
+      "notProvided": "Not provided",
+      "notSpecified": "Not specified",
+      "noneSpecified": "None specified"
+    },
+    "loading": "Loading dashboard...",
+    "error": "Failed to load dashboard"
+  },
+  "profileEdit": {
+    "title": "Edit Profile",
+    "loading": "Loading...",
+    "error": {
+      "load": "Failed to load profile",
+      "update": "Failed to update profile"
+    },
+    "form": {
+      "name": {
+        "label": "Name",
+        "placeholder": "Your full name",
+        "required": "Name is required"
+      },
+      "email": {
+        "label": "Email",
+        "disabled": "Email cannot be changed"
+      },
+      "image": {
+        "label": "Profile Picture URL",
+        "placeholder": "https://example.com/your-photo.jpg",
+        "helper": "Add a URL to your profile picture (optional)"
+      },
+      "bio": {
+        "label": "Bio",
+        "placeholder": "Tell us about yourself...",
+        "helper": "Share your background and interests"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "Your city or region",
+        "helper": "Where are you based?"
+      },
+      "languages": {
+        "label": "Languages",
+        "placeholder": "English, Spanish, French",
+        "helper": "List the languages you speak (comma-separated)"
+      },
+      "expertise": {
+        "label": "Areas of Expertise",
+        "placeholder": "History, Culture, Adventure",
+        "helper": "List your areas of expertise (comma-separated)"
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "name": "Name must be a string with maximum 50 characters",
+      "bio": "Bio must be a string with maximum 500 characters",
+      "languages": "Maximum 5 languages allowed",
+      "expertise": "Maximum 5 expertise entries allowed",
+      "image": {
+        "invalid": "Invalid image URL",
+        "type": "Invalid image type. Allowed types: JPEG, PNG, WebP"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Or create a new account",
+      "email": {
+        "label": "Email address",
+        "placeholder": "Email address"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Password"
+      },
+      "submit": "Sign in",
+      "errors": {
+        "invalidCredentials": "Invalid credentials",
+        "generic": "Something went wrong"
+      }
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Or sign in to your account",
+      "name": {
+        "label": "Name",
+        "placeholder": "Full name"
+      },
+      "email": {
+        "label": "Email address",
+        "placeholder": "Email address"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Password"
+      },
+      "role": {
+        "label": "Role",
+        "placeholder": "Select your role",
+        "tourist": "Tourist",
+        "guide": "Local Guide"
+      },
+      "submit": "Create account",
+      "errors": {
+        "generic": "Something went wrong"
+      }
+    },
+    "signOut": "Sign out"
+  },
+  "tours": {
+    "listing": {
+      "title": "Available Tours",
+      "createTour": "Create New Tour",
+      "loading": "Loading tours...",
+      "error": "Failed to fetch tours",
+      "noTours": "No tours available at the moment.",
+      "noImage": "No image available",
+      "noReviews": "No reviews",
+      "price": "${price}",
+      "location": "{location}",
+      "rating": "{rating}",
+      "duration": "{duration} hours",
+      "groupSize": "Max {size} people"
+    },
+    "details": {
+      "loading": "Loading...",
+      "error": "Failed to load tour details",
+      "notFound": "Tour not found",
+      "noImage": "No image available",
+      "perPerson": "per person",
+      "aboutTour": "About this tour",
+      "whatsIncluded": "What's included",
+      "bookTour": "Book this tour",
+      "selectDate": "Select a date to book this tour.",
+      "booking": {
+        "loading": "Booking...",
+        "button": "Book Now",
+        "error": "Failed to create booking",
+        "success": "Booking created successfully"
+      },
+      "reviews": {
+        "title": "Reviews",
+        "subtitle": "What others are saying about this tour",
+        "noReviews": "No reviews yet. Be the first to review!",
+        "rating": "{rating} out of 5 ({count} reviews)",
+        "leaveReview": "Leave a Review",
+        "shareExperience": "Share your experience with this tour"
+      }
+    },
+    "create": {
+      "title": "Create New Tour",
+      "loading": "Loading...",
+      "error": "An error occurred while creating the tour",
+      "form": {
+        "title": {
+          "label": "Tour Title",
+          "placeholder": "Enter a descriptive title for your tour",
+          "helper": "Make it catchy and descriptive",
+          "error": "Title must be at least 3 characters long"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Describe your tour in detail...",
+          "helper": "Minimum 50 characters. Include key highlights and what makes your tour unique.",
+          "error": "Description must be at least 50 characters long"
+        },
+        "location": {
+          "label": "Location",
+          "placeholder": "Enter the tour location",
+          "helper": "Be specific about the city/region",
+          "error": "Location is required"
+        },
+        "price": {
+          "label": "Price (USD)",
+          "placeholder": "0.00",
+          "helper": "Set a competitive price",
+          "error": "Price must be greater than 0"
+        },
+        "duration": {
+          "label": "Duration (hours)",
+          "placeholder": "Enter duration",
+          "helper": "Total tour duration",
+          "error": "Duration must be greater than 0"
+        },
+        "maxGroupSize": {
+          "label": "Maximum Group Size",
+          "placeholder": "Enter maximum group size",
+          "helper": "Consider the optimal group size for the best experience",
+          "error": "Maximum group size must be greater than 0"
+        },
+        "included": {
+          "label": "What's Included",
+          "placeholder": "e.g., Guide, Transportation, Snacks",
+          "helper": "Separate items with commas",
+          "error": "Please specify what's included in the tour"
+        },
+        "imageUrl": {
+          "label": "Image URL",
+          "placeholder": "https://example.com/tour-image.jpg",
+          "helper": "Add a representative image of your tour (optional)"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Create Tour",
+        "submitting": "Creating..."
+      }
+    },
+    "edit": {
+      "title": "Edit Tour",
+      "loading": "Loading...",
+      "error": {
+        "load": "Failed to load tour",
+        "update": "Failed to update tour",
+        "notFound": "Tour not found"
+      },
+      "form": {
+        "title": {
+          "label": "Tour Title",
+          "placeholder": "Enter a descriptive title for your tour",
+          "helper": "Make it catchy and descriptive",
+          "error": "Title must be at least 3 characters long"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Describe your tour in detail...",
+          "helper": "Minimum 50 characters. Include key highlights and what makes your tour unique.",
+          "error": "Description must be at least 50 characters long"
+        },
+        "location": {
+          "label": "Location",
+          "placeholder": "Enter the tour location",
+          "helper": "Be specific about the city/region",
+          "error": "Location is required"
+        },
+        "price": {
+          "label": "Price (USD)",
+          "placeholder": "0.00",
+          "helper": "Set a competitive price",
+          "error": "Price must be greater than 0"
+        },
+        "duration": {
+          "label": "Duration (hours)",
+          "placeholder": "Enter duration",
+          "helper": "Total tour duration",
+          "error": "Duration must be greater than 0"
+        },
+        "maxGroupSize": {
+          "label": "Maximum Group Size",
+          "placeholder": "Enter maximum group size",
+          "helper": "Consider the optimal group size for the best experience",
+          "error": "Maximum group size must be greater than 0"
+        },
+        "included": {
+          "label": "What's Included",
+          "placeholder": "e.g., Guide, Transportation, Snacks",
+          "helper": "Separate items with commas",
+          "error": "Please specify what's included in the tour"
+        },
+        "imageUrl": {
+          "label": "Image URL",
+          "placeholder": "https://example.com/tour-image.jpg",
+          "helper": "Add a representative image of your tour (optional)"
+        }
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Save Changes",
+        "submitting": "Saving..."
+      }
+    }
+  }
+} 

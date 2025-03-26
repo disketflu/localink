@@ -8,6 +8,7 @@ import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 import ReviewForm from "@/components/ReviewForm"
 import { Input } from "@/components/ui/Input"
+import { useTranslations } from 'next-intl'
 
 interface Tour {
   id: string
@@ -55,13 +56,14 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
   const [bookingDate, setBookingDate] = useState("")
   const [bookingError, setBookingError] = useState("")
   const [bookingLoading, setBookingLoading] = useState(false)
+  const t = useTranslations('tours.details')
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const tourResponse = await fetch(`/api/tours/${resolvedParams.id}`)
         if (!tourResponse.ok) {
-          throw new Error("Failed to fetch tour data")
+          throw new Error(t('error'))
         }
         const tourData = await tourResponse.json()
         setTour(tourData)
@@ -82,14 +84,14 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load tour details")
+        setError(err instanceof Error ? err.message : t('error'))
       } finally {
         setLoading(false)
       }
     }
 
     fetchData()
-  }, [resolvedParams.id, session?.user])
+  }, [resolvedParams.id, session?.user, t])
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -110,13 +112,13 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to create booking")
+        throw new Error(errorData.error || t('booking.error'))
       }
 
       router.push("/dashboard/tourist")
     } catch (error) {
       console.error("Error creating booking:", error)
-      setBookingError(error instanceof Error ? error.message : "Failed to create booking")
+      setBookingError(error instanceof Error ? error.message : t('booking.error'))
     } finally {
       setBookingLoading(false)
     }
@@ -127,7 +129,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -137,7 +139,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <p className="text-red-600">{error || "Tour not found"}</p>
+          <p className="text-red-600">{error || t('notFound')}</p>
         </div>
       </div>
     )
@@ -161,7 +163,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
               />
             ) : (
               <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">No image available</span>
+                <span className="text-gray-400">{t('noImage')}</span>
               </div>
             )}
           </div>
@@ -174,19 +176,19 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
               </div>
               <div className="text-right">
                 <p className="text-2xl font-bold text-indigo-600">${tour.price}</p>
-                <p className="text-sm text-gray-500">per person</p>
+                <p className="text-sm text-gray-500">{t('perPerson')}</p>
               </div>
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <div className="prose max-w-none">
-                  <h2 className="text-xl font-semibold text-gray-900">About this tour</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{t('aboutTour')}</h2>
                   <p className="mt-4 text-gray-600">{tour.description}</p>
                 </div>
 
                 <div className="mt-8">
-                  <h2 className="text-xl font-semibold text-gray-900">What&apos;s included</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{t('whatsIncluded')}</h2>
                   <ul className="mt-4 space-y-2">
                     {tour.included.map((item, index) => (
                       <li key={index} className="flex items-center text-gray-600">
@@ -202,7 +204,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
 
               <div className="lg:col-span-1">
                 <div className="bg-gray-50 p-6 rounded-lg">
-                  <h2 className="text-xl font-semibold text-gray-900">Book this tour</h2>
+                  <h2 className="text-xl font-semibold text-gray-900">{t('bookTour')}</h2>
                   <form onSubmit={handleBooking} className="mt-5">
                     {bookingError && (
                       <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -222,7 +224,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
                         disabled={bookingLoading}
                         className="inline-flex justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {bookingLoading ? "Booking..." : "Book Now"}
+                        {bookingLoading ? t('booking.loading') : t('booking.button')}
                       </button>
                     </div>
                   </form>
@@ -238,10 +240,10 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white shadow sm:rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
-                  Book this tour
+                  {t('bookTour')}
                 </h3>
                 <div className="mt-2 max-w-xl text-sm text-gray-500">
-                  <p>Select a date to book this tour.</p>
+                  <p>{t('selectDate')}</p>
                 </div>
 
                 <form onSubmit={handleBooking} className="mt-5">
@@ -263,7 +265,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
                       disabled={bookingLoading}
                       className="inline-flex justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {bookingLoading ? "Booking..." : "Book Now"}
+                      {bookingLoading ? t('booking.loading') : t('booking.button')}
                     </button>
                   </div>
                 </form>
@@ -278,10 +280,10 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
             <div className="bg-white shadow sm:rounded-lg">
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
-                  Leave a Review
+                  {t('reviews.leaveReview')}
                 </h3>
                 <div className="mt-2 max-w-xl text-sm text-gray-500">
-                  <p>Share your experience with this tour.</p>
+                  <p>{t('reviews.shareExperience')}</p>
                 </div>
 
                 <div className="mt-5">
@@ -307,15 +309,15 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
           <div className="bg-white shadow sm:rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
-                Reviews
+                {t('reviews.title')}
               </h3>
               <div className="mt-2 max-w-xl text-sm text-gray-500">
-                <p>What others are saying about this tour.</p>
+                <p>{t('reviews.subtitle')}</p>
               </div>
 
               <div className="mt-5 space-y-6">
                 {reviews.length === 0 ? (
-                  <p className="text-gray-500">No reviews yet. Be the first to review!</p>
+                  <p className="text-gray-500">{t('reviews.noReviews')}</p>
                 ) : (
                   reviews.map((review) => (
                     <div key={review.id} className="border-t border-gray-200 pt-5">
@@ -382,7 +384,7 @@ export default function TourDetailsPage({ params }: { params: Promise<{ id: stri
             ))}
           </div>
           <p className="ml-2 text-sm text-gray-600">
-            {averageRating.toFixed(1)} out of 5 ({reviews.length} reviews)
+            {t('reviews.rating', { rating: averageRating.toFixed(1), count: reviews.length })}
           </p>
         </div>
       </div>

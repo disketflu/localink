@@ -1,18 +1,36 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Providers } from "./providers";
-import SignOutButton from "@/components/SignOutButton";
+import LocaleProvider from "@/components/LocaleProvider";
+import Header from "@/components/Header";
+import { cookies } from "next/headers";
+import { notFound } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "LocaLink - Connect with Local Guides",
-  description: "Discover authentic travel experiences with local guides",
-};
+const DEFAULT_LOCALE = 'fr';
+const SUPPORTED_LOCALES = ['fr', 'en'];
+
+async function getMessages(locale: string) {
+  try {
+    return (await import(`@/messages/${locale}.json`)).default;
+  } catch (error) {
+    console.error(`Failed to load messages for locale ${locale}:`, error);
+    // If the requested locale fails, try to fall back to the default locale
+    if (locale !== DEFAULT_LOCALE) {
+      try {
+        return (await import(`@/messages/${DEFAULT_LOCALE}.json`)).default;
+      } catch {
+        // If even the default locale fails, we have a serious problem
+        notFound();
+      }
+    } else {
+      notFound();
+    }
+  }
+}
 
 export default async function RootLayout({
   children,
@@ -20,69 +38,25 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await getServerSession(authOptions);
+  
+  // Get locale from cookie or default to French
+  const cookieStore = await cookies();
+  const savedLocale = cookieStore.get('NEXT_LOCALE')?.value;
+  const locale = savedLocale && SUPPORTED_LOCALES.includes(savedLocale) 
+    ? savedLocale 
+    : DEFAULT_LOCALE;
+
+  // Load messages with fallback handling
+  const messages = await getMessages(locale);
 
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body className={`${inter.className} bg-white`}>
         <Providers>
-          <nav className="bg-white shadow-sm relative z-50">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="flex h-16 justify-between">
-                <div className="flex">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link 
-                      href="/" 
-                      className="text-2xl font-bold text-indigo-600 hover:text-indigo-500 transition-colors relative z-10"
-                    >
-                      LocaLink
-                    </Link>
-                  </div>
-                  <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-                    <Link
-                      href="/tours"
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors relative z-10"
-                    >
-                      Browse Tours
-                    </Link>
-                    {session?.user && (
-                      <Link
-                        href="/dashboard"
-                        className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors relative z-10"
-                      >
-                        Dashboard
-                      </Link>
-                    )}
-                  </div>
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                  {session ? (
-                    <div className="flex items-center space-x-6">
-                      <span className="text-sm font-medium text-gray-700">
-                        Welcome, {session.user.name}
-                      </span>
-                      <SignOutButton />
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-6">
-                      <Link
-                        href="/auth/login"
-                        className="text-sm font-medium text-gray-900 hover:text-indigo-600 transition-colors relative z-10"
-                      >
-                        Log in
-                      </Link>
-                      <Link
-                        href="/auth/register"
-                        className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors relative z-10"
-                      >
-                        Sign up
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </nav>
-          {children}
+          <LocaleProvider messages={messages} locale={locale}>
+            <Header session={session} />
+            {children}
+          </LocaleProvider>
         </Providers>
       </body>
     </html>

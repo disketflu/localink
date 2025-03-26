@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
+import { useTranslations } from 'next-intl';
 
 interface ChatMessage {
   id: string;
@@ -46,6 +47,7 @@ export default function Messages({ bookings }: { bookings: Booking[] }) {
   const { data: session } = useSession();
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const isGuide = session?.user?.role === 'GUIDE';
+  const t = useTranslations('messages');
   
   // Filter only active bookings
   const activeBookings = bookings.filter(
@@ -64,53 +66,52 @@ export default function Messages({ bookings }: { bookings: Booking[] }) {
       {/* Chat List */}
       <div className="w-1/3 border-r border-gray-200 overflow-y-auto">
         <div className="p-4">
-          <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('title')}</h2>
           <p className="text-sm text-gray-500">
-            {isGuide ? "Chat with your tourists" : "Chat with your guides"}
+            {t(`subtitle.${isGuide ? 'guide' : 'tourist'}`)}
           </p>
         </div>
-        <div className="divide-y divide-gray-200">
-          {activeBookings.map((booking) => (
-            <button
-              key={booking.id}
-              onClick={() => setSelectedChat(booking.id)}
-              className={`w-full p-4 text-left hover:bg-gray-50 ${
-                selectedChat === booking.id ? 'bg-gray-50' : ''
-              }`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  {booking.tour.imageUrl ? (
-                    <Image
-                      src={booking.tour.imageUrl}
-                      alt={booking.tour.title}
-                      width={40}
-                      height={40}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <ChatBubbleLeftIcon className="h-6 w-6 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {booking.tour.title}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate">
-                    {isGuide ? "Tourist" : "Guide"}: {getParticipantName(booking)}
-                  </p>
-                </div>
+        
+        {activeBookings.map((booking) => (
+          <button
+            key={booking.id}
+            onClick={() => setSelectedChat(booking.id)}
+            className={`w-full p-4 text-left hover:bg-gray-50 ${
+              selectedChat === booking.id ? 'bg-gray-50' : ''
+            }`}
+          >
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                {booking.tour.imageUrl ? (
+                  <Image
+                    src={booking.tour.imageUrl}
+                    alt={booking.tour.title}
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                    <ChatBubbleLeftIcon className="h-6 w-6 text-gray-400" />
+                  </div>
+                )}
               </div>
-            </button>
-          ))}
-          {activeBookings.length === 0 && (
-            <div className="p-4 text-center text-gray-500">
-              No active bookings to chat about
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {booking.tour.title}
+                </p>
+                <p className="text-sm text-gray-500 truncate">
+                  {t(`participant.${isGuide ? 'tourist' : 'guide'}`)}: {getParticipantName(booking)}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+          </button>
+        ))}
+        {activeBookings.length === 0 && (
+          <div className="p-4 text-center text-gray-500">
+            {t('noActiveBookings')}
+          </div>
+        )}
       </div>
 
       {/* Chat Window */}
@@ -122,7 +123,7 @@ export default function Messages({ bookings }: { bookings: Booking[] }) {
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            Select a chat to start messaging
+            {t('selectChat')}
           </div>
         )}
       </div>
@@ -141,6 +142,7 @@ function ChatWindow({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations('messages');
 
   // Fetch messages
   const fetchMessages = async (isInitialLoad = false) => {
@@ -158,7 +160,7 @@ function ChatWindow({
     } catch (error) {
       console.error("Error fetching messages:", error);
       if (isInitialLoad) {
-        setError("Failed to load messages");
+        setError(t('error'));
       }
     } finally {
       if (isInitialLoad) {
@@ -203,7 +205,7 @@ function ChatWindow({
       setMessage('');
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message');
+      setError(t('sendError'));
     }
   };
 
@@ -211,6 +213,7 @@ function ChatWindow({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+        <span className="ml-2">{t('loading')}</span>
       </div>
     );
   }
@@ -248,7 +251,7 @@ function ChatWindow({
                 </p>
                 {msg.sender && (
                   <p className="text-xs opacity-75">
-                    {msg.sender.name || 'Anonymous'}
+                    {msg.sender.name || t('anonymous')}
                   </p>
                 )}
               </div>
@@ -264,14 +267,14 @@ function ChatWindow({
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={t('input.placeholder')}
             className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             type="submit"
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
-            Send
+            {t('input.send')}
           </button>
         </div>
       </form>

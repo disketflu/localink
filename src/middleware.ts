@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { getToken } from "next-auth/jwt"
 
 // Rate limiting configuration
 const RATE_LIMIT = 100 // requests
@@ -19,11 +18,12 @@ export async function middleware(request: NextRequest) {
     path.startsWith("/static") ||
     path.startsWith("/api/auth")
   ) {
-    return NextResponse.next()
+    return NextResponse.next();
   }
 
-  // Get client IP
-  const ip = request.ip ?? "127.0.0.1"
+  // Get client IP from headers
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1';
 
   // Check rate limit
   const now = Date.now()
@@ -46,38 +46,26 @@ export async function middleware(request: NextRequest) {
   }
 
   // Add security headers
-  const response = NextResponse.next()
-
-  // Prevent clickjacking
+  const response = NextResponse.next();
   response.headers.set("X-Frame-Options", "DENY")
-  
-  // Enable XSS protection
   response.headers.set("X-XSS-Protection", "1; mode=block")
-  
-  // Prevent MIME type sniffing
   response.headers.set("X-Content-Type-Options", "nosniff")
-  
-  // Referrer policy
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
-  
-  // Content Security Policy
   response.headers.set(
     "Content-Security-Policy",
     "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
   )
 
-  return response
+  return response;
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (auth endpoints)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
+    // Match all request paths except for the ones starting with:
+    // - api/auth (auth endpoints)
+    // - _next/static (static files)
+    // - _next/image (image optimization files)
+    // - favicon.ico (favicon file)
     "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 } 

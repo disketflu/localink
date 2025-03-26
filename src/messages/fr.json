@@ -1,0 +1,444 @@
+{
+  "common": {
+    "language": "Langue",
+    "english": "Anglais",
+    "french": "Français"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "about": "À propos",
+    "contact": "Contact",
+    "browseTours": "Parcourir les visites",
+    "dashboard": "Tableau de bord",
+    "login": "Se connecter",
+    "signup": "S'inscrire",
+    "welcome": "Bienvenue, {name}"
+  },
+  "landing": {
+    "hero": {
+      "title": "Découvrez des Expériences Locales avec LocaLink",
+      "description": "Connectez-vous avec des guides locaux qui connaissent leurs villes sur le bout des doigts. Vivez des voyages authentiques, créez des souvenirs inoubliables et explorez comme un local.",
+      "cta": {
+        "getStarted": "Commencer",
+        "dashboard": "Accéder au tableau de bord",
+        "browseTours": "Parcourir les visites"
+      }
+    },
+    "features": {
+      "title": "Voyagez Mieux",
+      "subtitle": "Tout ce dont vous avez besoin pour une expérience de voyage authentique",
+      "description": "Connectez-vous avec des guides locaux expérimentés, découvrez des trésors cachés et créez des souvenirs qui durent toute une vie.",
+      "items": {
+        "expertise": {
+          "title": "Expertise Locale",
+          "description": "Connectez-vous avec des guides qui connaissent leurs villes sur le bout des doigts et peuvent vous montrer les trésors cachés que les touristes voient rarement."
+        },
+        "personalized": {
+          "title": "Expériences Personnalisées",
+          "description": "Personnalisez vos visites en fonction de vos intérêts et préférences pour une expérience vraiment unique."
+        },
+        "secure": {
+          "title": "Réservation Sécurisée",
+          "description": "Réservez en toute confiance en sachant que tous nos guides sont vérifiés et que vos paiements sont sécurisés."
+        }
+      }
+    }
+  },
+  "guideDashboard": {
+    "title": "Tableau de bord Guide",
+    "welcome": "Bon retour, {name}",
+    "createTour": "Créer une visite",
+    "earnings": {
+      "total": "Gains totaux",
+      "completed": "Visites terminées",
+      "pending": "Visites en attente",
+      "cancelled": "Visites annulées"
+    },
+    "tabs": {
+      "tours": "Mes visites",
+      "bookings": "Réservations",
+      "messages": "Messages",
+      "reviews": "Avis",
+      "profile": "Profil"
+    },
+    "tours": {
+      "noImage": "Pas d'image",
+      "bookings": "{count} réservations",
+      "edit": "Modifier la visite",
+      "delete": "Supprimer la visite",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette visite ?"
+    },
+    "bookings": {
+      "tourist": "Touriste : {name}",
+      "date": "Date : {date}",
+      "status": {
+        "CONFIRMED": "Confirmée",
+        "PENDING": "En attente",
+        "CANCELLED": "Annulée",
+        "COMPLETED": "Terminée"
+      },
+      "confirm": "Confirmer la réservation",
+      "confirmConfirm": "Êtes-vous sûr de vouloir confirmer cette réservation ?"
+    },
+    "reviews": {
+      "noReviews": "Aucun avis pour vos visites pour le moment.",
+      "by": "par {name}",
+      "on": "le {date}"
+    },
+    "profile": {
+      "title": "Profil Guide",
+      "subtitle": "Vos informations professionnelles et votre expertise",
+      "profilePicture": "Photo de profil",
+      "name": "Nom",
+      "email": "Email",
+      "bio": "Biographie",
+      "location": "Localisation",
+      "languages": "Langues",
+      "expertise": "Domaines d'expertise",
+      "totalTours": "Total des visites",
+      "totalBookings": "Total des réservations",
+      "averageRating": "Note moyenne",
+      "editProfile": "Modifier le profil",
+      "notProvided": "Non fourni",
+      "notSpecified": "Non spécifié",
+      "noneSpecified": "Aucun spécifié"
+    },
+    "loading": "Chargement...",
+    "error": "Échec du chargement du tableau de bord"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": {
+      "guide": "Discutez avec vos touristes",
+      "tourist": "Discutez avec vos guides"
+    },
+    "noActiveBookings": "Aucune réservation active pour discuter",
+    "selectChat": "Sélectionnez une conversation pour commencer à discuter",
+    "loading": "Chargement des messages...",
+    "error": "Échec du chargement des messages",
+    "sendError": "Échec de l'envoi du message",
+    "input": {
+      "placeholder": "Tapez votre message...",
+      "send": "Envoyer"
+    },
+    "participant": {
+      "guide": "Guide",
+      "tourist": "Touriste"
+    },
+    "anonymous": "Anonyme"
+  },
+  "touristDashboard": {
+    "title": "Tableau de bord Touriste",
+    "welcome": "Bon retour, {name}",
+    "browseTours": "Parcourir les visites",
+    "tabs": {
+      "bookings": "Mes réservations",
+      "messages": "Messages",
+      "reviews": "Mes avis",
+      "profile": "Profil"
+    },
+    "tours": {
+      "noImage": "Pas d'image"
+    },
+    "bookings": {
+      "guide": "Guide : {name}",
+      "date": "Date : {date}",
+      "status": {
+        "CONFIRMED": "Confirmée",
+        "PENDING": "En attente",
+        "CANCELLED": "Annulée",
+        "COMPLETED": "Terminée"
+      },
+      "cancel": "Annuler la réservation",
+      "cancelConfirm": "Êtes-vous sûr de vouloir annuler cette réservation ?",
+      "review": "Avis"
+    },
+    "reviews": {
+      "noReviews": "Vous n'avez pas encore écrit d'avis."
+    },
+    "profile": {
+      "title": "Informations du profil",
+      "subtitle": "Vos informations personnelles et préférences",
+      "profilePicture": "Photo de profil",
+      "name": "Nom",
+      "email": "Email",
+      "bio": "Biographie",
+      "location": "Localisation",
+      "languages": "Langues",
+      "editProfile": "Modifier le profil",
+      "notProvided": "Non fourni",
+      "notSpecified": "Non spécifié",
+      "noneSpecified": "Aucun spécifié"
+    },
+    "loading": "Chargement du tableau de bord...",
+    "error": "Échec du chargement du tableau de bord"
+  },
+  "profileEdit": {
+    "title": "Modifier le profil",
+    "loading": "Chargement...",
+    "error": {
+      "load": "Échec du chargement du profil",
+      "update": "Échec de la mise à jour du profil"
+    },
+    "form": {
+      "name": {
+        "label": "Nom",
+        "placeholder": "Votre nom complet",
+        "required": "Le nom est requis"
+      },
+      "email": {
+        "label": "Email",
+        "disabled": "L'email ne peut pas être modifié"
+      },
+      "image": {
+        "label": "URL de la photo de profil",
+        "placeholder": "https://example.com/votre-photo.jpg",
+        "helper": "Ajoutez une URL pour votre photo de profil (optionnel)"
+      },
+      "bio": {
+        "label": "Biographie",
+        "placeholder": "Parlez-nous de vous...",
+        "helper": "Partagez votre parcours et vos centres d'intérêt"
+      },
+      "location": {
+        "label": "Localisation",
+        "placeholder": "Votre ville ou région",
+        "helper": "Où êtes-vous basé ?"
+      },
+      "languages": {
+        "label": "Langues",
+        "placeholder": "Français, Anglais, Espagnol",
+        "helper": "Listez les langues que vous parlez (séparées par des virgules)"
+      },
+      "expertise": {
+        "label": "Domaines d'expertise",
+        "placeholder": "Histoire, Culture, Aventure",
+        "helper": "Listez vos domaines d'expertise (séparés par des virgules)"
+      }
+    },
+    "buttons": {
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "saving": "Enregistrement..."
+    },
+    "validation": {
+      "name": "Le nom doit être une chaîne de caractères d'un maximum de 50 caractères",
+      "bio": "La biographie doit être une chaîne de caractères d'un maximum de 500 caractères",
+      "languages": "Maximum 5 langues autorisées",
+      "expertise": "Maximum 5 domaines d'expertise autorisés",
+      "image": {
+        "invalid": "URL d'image invalide",
+        "type": "Type d'image invalide. Types autorisés : JPEG, PNG, WebP"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Connectez-vous à votre compte",
+      "subtitle": "Ou créez un nouveau compte",
+      "email": {
+        "label": "Adresse email",
+        "placeholder": "Adresse email"
+      },
+      "password": {
+        "label": "Mot de passe",
+        "placeholder": "Mot de passe"
+      },
+      "submit": "Se connecter",
+      "errors": {
+        "invalidCredentials": "Identifiants invalides",
+        "generic": "Une erreur est survenue"
+      }
+    },
+    "register": {
+      "title": "Créez votre compte",
+      "subtitle": "Ou connectez-vous à votre compte",
+      "name": {
+        "label": "Nom",
+        "placeholder": "Nom complet"
+      },
+      "email": {
+        "label": "Adresse email",
+        "placeholder": "Adresse email"
+      },
+      "password": {
+        "label": "Mot de passe",
+        "placeholder": "Mot de passe"
+      },
+      "role": {
+        "label": "Rôle",
+        "placeholder": "Sélectionnez votre rôle",
+        "tourist": "Touriste",
+        "guide": "Guide local"
+      },
+      "submit": "Créer le compte",
+      "errors": {
+        "generic": "Une erreur est survenue"
+      }
+    },
+    "signOut": "Se déconnecter"
+  },
+  "tours": {
+    "listing": {
+      "title": "Visites Disponibles",
+      "createTour": "Créer une Nouvelle Visite",
+      "loading": "Chargement des visites...",
+      "error": "Échec du chargement des visites",
+      "noTours": "Aucune visite disponible pour le moment.",
+      "noImage": "Aucune image disponible",
+      "noReviews": "Aucun avis",
+      "price": "{price} €",
+      "location": "{location}",
+      "rating": "{rating}",
+      "duration": "{duration} heures",
+      "groupSize": "Max {size} personnes"
+    },
+    "details": {
+      "loading": "Chargement...",
+      "error": "Échec du chargement des détails de la visite",
+      "notFound": "Visite non trouvée",
+      "noImage": "Aucune image disponible",
+      "perPerson": "par personne",
+      "aboutTour": "À propos de cette visite",
+      "whatsIncluded": "Ce qui est inclus",
+      "bookTour": "Réserver cette visite",
+      "selectDate": "Sélectionnez une date pour réserver cette visite.",
+      "booking": {
+        "loading": "Réservation en cours...",
+        "button": "Réserver maintenant",
+        "error": "Échec de la création de la réservation",
+        "success": "Réservation créée avec succès"
+      },
+      "reviews": {
+        "title": "Avis",
+        "subtitle": "Ce que disent les autres de cette visite",
+        "noReviews": "Aucun avis pour le moment. Soyez le premier à donner votre avis !",
+        "rating": "{rating} sur 5 ({count} avis)",
+        "leaveReview": "Laisser un avis",
+        "shareExperience": "Partagez votre expérience de cette visite"
+      }
+    },
+    "create": {
+      "title": "Créer une Nouvelle Visite",
+      "loading": "Chargement...",
+      "error": "Une erreur est survenue lors de la création de la visite",
+      "form": {
+        "title": {
+          "label": "Titre de la Visite",
+          "placeholder": "Entrez un titre descriptif pour votre visite",
+          "helper": "Rendez-le accrocheur et descriptif",
+          "error": "Le titre doit contenir au moins 3 caractères"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Décrivez votre visite en détail...",
+          "helper": "Minimum 50 caractères. Incluez les points clés et ce qui rend votre visite unique.",
+          "error": "La description doit contenir au moins 50 caractères"
+        },
+        "location": {
+          "label": "Localisation",
+          "placeholder": "Entrez la localisation de la visite",
+          "helper": "Soyez précis sur la ville/région",
+          "error": "La localisation est requise"
+        },
+        "price": {
+          "label": "Prix (EUR)",
+          "placeholder": "0.00",
+          "helper": "Fixez un prix compétitif",
+          "error": "Le prix doit être supérieur à 0"
+        },
+        "duration": {
+          "label": "Durée (heures)",
+          "placeholder": "Entrez la durée",
+          "helper": "Durée totale de la visite",
+          "error": "La durée doit être supérieure à 0"
+        },
+        "maxGroupSize": {
+          "label": "Taille Maximale du Groupe",
+          "placeholder": "Entrez la taille maximale du groupe",
+          "helper": "Considérez la taille optimale pour la meilleure expérience",
+          "error": "La taille maximale du groupe doit être supérieure à 0"
+        },
+        "included": {
+          "label": "Ce qui est Inclus",
+          "placeholder": "ex: Guide, Transport, Collations",
+          "helper": "Séparez les éléments par des virgules",
+          "error": "Veuillez spécifier ce qui est inclus dans la visite"
+        },
+        "imageUrl": {
+          "label": "URL de l'Image",
+          "placeholder": "https://example.com/image-visite.jpg",
+          "helper": "Ajoutez une image représentative de votre visite (optionnel)"
+        }
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "submit": "Créer la Visite",
+        "submitting": "Création en cours..."
+      }
+    },
+    "edit": {
+      "title": "Modifier la Visite",
+      "loading": "Chargement...",
+      "error": {
+        "loading": "Échec du chargement de la visite",
+        "updating": "Échec de la mise à jour de la visite",
+        "notFound": "Visite non trouvée"
+      },
+      "form": {
+        "title": {
+          "label": "Titre de la Visite",
+          "placeholder": "Entrez un titre descriptif pour votre visite",
+          "helper": "Rendez-le accrocheur et descriptif",
+          "error": "Le titre doit contenir au moins 3 caractères"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Décrivez votre visite en détail...",
+          "helper": "Minimum 50 caractères. Incluez les points clés et ce qui rend votre visite unique.",
+          "error": "La description doit contenir au moins 50 caractères"
+        },
+        "location": {
+          "label": "Localisation",
+          "placeholder": "Entrez la localisation de la visite",
+          "helper": "Soyez précis sur la ville/région",
+          "error": "La localisation est requise"
+        },
+        "price": {
+          "label": "Prix (EUR)",
+          "placeholder": "0.00",
+          "helper": "Fixez un prix compétitif",
+          "error": "Le prix doit être supérieur à 0"
+        },
+        "duration": {
+          "label": "Durée (heures)",
+          "placeholder": "Entrez la durée",
+          "helper": "Durée totale de la visite",
+          "error": "La durée doit être supérieure à 0"
+        },
+        "maxGroupSize": {
+          "label": "Taille Maximale du Groupe",
+          "placeholder": "Entrez la taille maximale du groupe",
+          "helper": "Considérez la taille optimale pour la meilleure expérience",
+          "error": "La taille maximale du groupe doit être supérieure à 0"
+        },
+        "included": {
+          "label": "Ce qui est Inclus",
+          "placeholder": "ex: Guide, Transport, Collations",
+          "helper": "Séparez les éléments par des virgules",
+          "error": "Veuillez spécifier ce qui est inclus dans la visite"
+        },
+        "imageUrl": {
+          "label": "URL de l'Image",
+          "placeholder": "https://example.com/image-visite.jpg",
+          "helper": "Ajoutez une image représentative de votre visite (optionnel)"
+        }
+      },
+      "buttons": {
+        "cancel": "Annuler",
+        "submit": "Enregistrer les Modifications",
+        "submitting": "Enregistrement en cours..."
+      }
+    }
+  }
+} 

@@ -6,6 +6,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { StarIcon } from "@heroicons/react/20/solid"
 import Messages from "@/components/Messages"
+import { useTranslations } from 'next-intl'
 
 interface Profile {
   bio: string | null
@@ -95,6 +96,7 @@ export default function GuideDashboard() {
     cancelled: 0,
   })
   const [activeTab, setActiveTab] = useState("tours")
+  const t = useTranslations('guideDashboard')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -163,7 +165,7 @@ export default function GuideDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -172,7 +174,7 @@ export default function GuideDashboard() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center text-red-600">{error}</div>
+        <div className="text-center text-red-600">{t('error')}</div>
       </div>
     )
   }
@@ -182,9 +184,9 @@ export default function GuideDashboard() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="sm:flex sm:items-center">
           <div className="sm:flex-auto">
-            <h1 className="text-2xl font-semibold text-gray-900">Guide Dashboard</h1>
+            <h1 className="text-2xl font-semibold text-gray-900">{t('title')}</h1>
             <p className="mt-2 text-sm text-gray-700">
-              Welcome back, {session?.user?.name}
+              {t('welcome', { name: session?.user?.name })}
             </p>
           </div>
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -192,7 +194,7 @@ export default function GuideDashboard() {
               href="/tours/create"
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
             >
-              Create Tour
+              {t('createTour')}
             </Link>
           </div>
         </div>
@@ -200,25 +202,25 @@ export default function GuideDashboard() {
         {/* Earnings Overview */}
         <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Total Earnings</dt>
+            <dt className="truncate text-sm font-medium text-gray-500">{t('earnings.total')}</dt>
             <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
               ${earnings.total.toFixed(2)}
             </dd>
           </div>
           <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Completed Tours</dt>
+            <dt className="truncate text-sm font-medium text-gray-500">{t('earnings.completed')}</dt>
             <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
               ${earnings.completed.toFixed(2)}
             </dd>
           </div>
           <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Pending Tours</dt>
+            <dt className="truncate text-sm font-medium text-gray-500">{t('earnings.pending')}</dt>
             <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
               ${earnings.pending.toFixed(2)}
             </dd>
           </div>
           <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-            <dt className="truncate text-sm font-medium text-gray-500">Cancelled Tours</dt>
+            <dt className="truncate text-sm font-medium text-gray-500">{t('earnings.cancelled')}</dt>
             <dd className="mt-1 text-3xl font-semibold tracking-tight text-gray-900">
               ${earnings.cancelled.toFixed(2)}
             </dd>
@@ -236,7 +238,7 @@ export default function GuideDashboard() {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
             >
-              My Tours
+              {t('tabs.tours')}
             </button>
             <button
               onClick={() => setActiveTab("bookings")}
@@ -246,7 +248,7 @@ export default function GuideDashboard() {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
             >
-              Bookings
+              {t('tabs.bookings')}
             </button>
             <button
               onClick={() => setActiveTab("messages")}
@@ -256,7 +258,7 @@ export default function GuideDashboard() {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
             >
-              Messages
+              {t('tabs.messages')}
             </button>
             <button
               onClick={() => setActiveTab("reviews")}
@@ -266,7 +268,7 @@ export default function GuideDashboard() {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
             >
-              Reviews
+              {t('tabs.reviews')}
             </button>
             <button
               onClick={() => setActiveTab("profile")}
@@ -276,7 +278,7 @@ export default function GuideDashboard() {
                   : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
               } whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium`}
             >
-              Profile
+              {t('tabs.profile')}
             </button>
           </nav>
         </div>
@@ -300,13 +302,14 @@ export default function GuideDashboard() {
                       />
                     ) : (
                       <div className="h-full w-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-gray-400">No image</span>
+                        <span className="text-gray-400">{t('tours.noImage')}</span>
                       </div>
                     )}
                     <div className="absolute top-2 right-2 flex space-x-2">
                       <Link
                         href={`/tours/${tour.id}/edit`}
                         className="rounded-md bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        title={t('tours.edit')}
                       >
                         <svg
                           className="h-5 w-5"
@@ -324,7 +327,7 @@ export default function GuideDashboard() {
                       </Link>
                       <button
                         onClick={async () => {
-                          if (confirm("Are you sure you want to delete this tour?")) {
+                          if (confirm(t('tours.deleteConfirm'))) {
                             try {
                               const response = await fetch(`/api/tours/${tour.id}`, {
                                 method: "DELETE",
@@ -339,6 +342,7 @@ export default function GuideDashboard() {
                           }
                         }}
                         className="rounded-md bg-white p-1 text-gray-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        title={t('tours.delete')}
                       >
                         <svg
                           className="h-5 w-5"
@@ -363,7 +367,7 @@ export default function GuideDashboard() {
                       <div className="flex items-center">
                         <StarIcon className="h-5 w-5 text-yellow-400" />
                         <span className="ml-1 text-sm text-gray-600">
-                          {tour.bookings.length} bookings
+                          {t('tours.bookings', { count: tour.bookings.length })}
                         </span>
                       </div>
                       <span className="text-sm font-medium text-gray-900">
@@ -399,7 +403,7 @@ export default function GuideDashboard() {
                               />
                             ) : (
                               <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center">
-                                <span className="text-gray-400">No image</span>
+                                <span className="text-gray-400">{t('tours.noImage')}</span>
                               </div>
                             )}
                           </div>
@@ -408,10 +412,10 @@ export default function GuideDashboard() {
                               {booking.tour.title}
                             </h4>
                             <p className="text-sm text-gray-500">
-                              Tourist: {booking.tourist.name}
+                              {t('bookings.tourist', { name: booking.tourist.name })}
                             </p>
                             <p className="text-sm text-gray-500">
-                              Date: {new Date(booking.date).toLocaleDateString()}
+                              {t('bookings.date', { date: new Date(booking.date).toLocaleDateString() })}
                             </p>
                           </div>
                         </div>
@@ -429,12 +433,12 @@ export default function GuideDashboard() {
                                 : "bg-gray-100 text-gray-800"
                             }`}
                           >
-                            {booking.status}
+                            {t(`bookings.status.${booking.status}`)}
                           </span>
                           {booking.status === "PENDING" && (
                             <button
                               onClick={async () => {
-                                if (confirm("Are you sure you want to confirm this booking?")) {
+                                if (confirm(t('bookings.confirmConfirm'))) {
                                   try {
                                     const response = await fetch(
                                       `/api/bookings/${booking.id}`,
@@ -449,60 +453,22 @@ export default function GuideDashboard() {
                                       }
                                     )
                                     if (!response.ok) {
-                                      const error = await response.text()
-                                      throw new Error(error || "Failed to confirm booking")
+                                      throw new Error("Failed to confirm booking")
                                     }
-                                    // Refresh the data instead of the whole page
-                                    const updatedBookings = bookings.map(b => 
-                                      b.id === booking.id ? { ...b, status: "CONFIRMED" } : b
-                                    )
-                                    setBookings(updatedBookings)
+                                    // Update local state
+                                    setBookings(bookings.map(b => 
+                                      b.id === booking.id 
+                                        ? { ...b, status: "CONFIRMED" }
+                                        : b
+                                    ))
                                   } catch (err) {
                                     console.error("Error confirming booking:", err)
-                                    setError(err instanceof Error ? err.message : "Failed to confirm booking")
                                   }
                                 }
                               }}
-                              className="text-sm font-medium text-green-600 hover:text-green-500"
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                             >
-                              Confirm
-                            </button>
-                          )}
-                          {booking.status === "CONFIRMED" && (
-                            <button
-                              onClick={async () => {
-                                if (confirm("Are you sure you want to mark this booking as completed?")) {
-                                  try {
-                                    const response = await fetch(
-                                      `/api/bookings/${booking.id}`,
-                                      {
-                                        method: "PATCH",
-                                        headers: {
-                                          "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify({
-                                          status: "COMPLETED"
-                                        })
-                                      }
-                                    )
-                                    if (!response.ok) {
-                                      const error = await response.text()
-                                      throw new Error(error || "Failed to complete booking")
-                                    }
-                                    // Refresh the data instead of the whole page
-                                    const updatedBookings = bookings.map(b => 
-                                      b.id === booking.id ? { ...b, status: "COMPLETED" } : b
-                                    )
-                                    setBookings(updatedBookings)
-                                  } catch (err) {
-                                    console.error("Error completing booking:", err)
-                                    setError(err instanceof Error ? err.message : "Failed to complete booking")
-                                  }
-                                }
-                              }}
-                              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-                            >
-                              Mark as Completed
+                              {t('bookings.confirm')}
                             </button>
                           )}
                         </div>
@@ -518,9 +484,11 @@ export default function GuideDashboard() {
             <div className="overflow-hidden bg-white shadow sm:rounded-md">
               <ul className="divide-y divide-gray-200">
                 {reviews.length === 0 ? (
-                  <li className="px-4 py-5 sm:px-6">
-                    <div className="text-center text-gray-500">
-                      No reviews yet for your tours.
+                  <li>
+                    <div className="px-4 py-5 sm:px-6">
+                      <div className="text-center text-gray-500">
+                        {t('reviews.noReviews')}
+                      </div>
                     </div>
                   </li>
                 ) : (
@@ -550,7 +518,7 @@ export default function GuideDashboard() {
                                   </div>
                                 )}
                                 <span className="text-sm text-gray-600 mr-2">
-                                  {review.author.name}
+                                  {t('reviews.by', { name: review.author.name })}
                                 </span>
                               </div>
                               {[1, 2, 3, 4, 5].map((value) => (
@@ -569,7 +537,7 @@ export default function GuideDashboard() {
                             </p>
                           </div>
                           <div className="text-sm text-gray-500">
-                            {new Date(review.createdAt).toLocaleDateString()}
+                            {t('reviews.on', { date: new Date(review.createdAt).toLocaleDateString() })}
                           </div>
                         </div>
                       </div>
@@ -584,16 +552,16 @@ export default function GuideDashboard() {
             <div className="overflow-hidden bg-white shadow sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
-                  Guide Profile
+                  {t('profile.title')}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Your professional information and expertise
+                  {t('profile.subtitle')}
                 </p>
               </div>
               <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Profile Picture</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.profilePicture')}</dt>
                     <dd className="mt-2 flex items-center">
                       {session?.user?.image ? (
                         <Image
@@ -605,63 +573,63 @@ export default function GuideDashboard() {
                         />
                       ) : (
                         <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">No image</span>
+                          <span className="text-gray-400">{t('tours.noImage')}</span>
                         </div>
                       )}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Name</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.name')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
-                      {session?.user?.name || "Not provided"}
+                      {session?.user?.name || t('profile.notProvided')}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Email</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.email')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {session?.user?.email}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Bio</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.bio')}</dt>
                     <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">
-                      {session?.user?.profile?.bio || "No bio provided"}
+                      {session?.user?.profile?.bio || t('profile.notProvided')}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Location</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.location')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
-                      {session?.user?.profile?.location || "Not specified"}
+                      {session?.user?.profile?.location || t('profile.notSpecified')}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Languages</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.languages')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {session?.user?.profile?.languages?.length > 0
                         ? session.user.profile.languages.join(", ")
-                        : "None specified"}
+                        : t('profile.noneSpecified')}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Areas of Expertise</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.expertise')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {session?.user?.profile?.expertise?.length > 0
                         ? session.user.profile.expertise.join(", ")
-                        : "None specified"}
+                        : t('profile.noneSpecified')}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Total Tours</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.totalTours')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">{tours.length}</dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-gray-500">Total Bookings</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.totalBookings')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {tours.reduce((acc, tour) => acc + tour.bookings.length, 0)}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="text-sm font-medium text-gray-500">Average Rating</dt>
+                    <dt className="text-sm font-medium text-gray-500">{t('profile.averageRating')}</dt>
                     <dd className="mt-1 text-sm text-gray-900">
                       {tours.reduce((acc, tour) => {
                         const ratings = tour.reviews?.map((r) => r.rating) || []
@@ -677,7 +645,7 @@ export default function GuideDashboard() {
                     href="/profile/edit"
                     className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
                   >
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Link>
                 </div>
               </div>

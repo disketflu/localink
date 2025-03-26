@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Input, Textarea } from "@/components/ui/Input"
+import { useTranslations } from 'next-intl'
 
 interface Profile {
   bio: string | null
@@ -27,6 +28,7 @@ export default function EditProfilePage() {
     expertise: "",
     image: "",
   })
+  const t = useTranslations()
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -46,7 +48,7 @@ export default function EditProfilePage() {
           image: data.image || "",
         })
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load profile")
+        setError(err instanceof Error ? err.message : t('profileEdit.error.load'))
       } finally {
         setLoading(false)
       }
@@ -82,13 +84,13 @@ export default function EditProfilePage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || "Failed to update profile")
+        throw new Error(data.error || t('profileEdit.error.update'))
       }
 
       router.push(session?.user?.role === "GUIDE" ? "/dashboard/guide" : "/dashboard/tourist")
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update profile")
+      setError(err instanceof Error ? err.message : t('profileEdit.error.update'))
     } finally {
       setSaving(false)
     }
@@ -99,7 +101,7 @@ export default function EditProfilePage() {
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t('profileEdit.loading')}</p>
         </div>
       </div>
     )
@@ -115,7 +117,7 @@ export default function EditProfilePage() {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-sm rounded-lg p-8">
           <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 mb-8">
-            Edit Profile
+            {t('profileEdit.title')}
           </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -127,66 +129,68 @@ export default function EditProfilePage() {
 
             <div className="space-y-6">
               <Input
-                label="Name"
+                label={t('profileEdit.form.name.label')}
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                placeholder="Your full name"
+                placeholder={t('profileEdit.form.name.placeholder')}
+                helperText={t('profileEdit.form.name.required')}
               />
 
               <Input
-                label="Email"
+                label={t('profileEdit.form.email.label')}
                 type="email"
                 value={formData.email}
                 disabled
                 className="bg-gray-50"
+                helperText={t('profileEdit.form.email.disabled')}
               />
 
               <Input
-                label="Profile Picture URL"
+                label={t('profileEdit.form.image.label')}
                 type="url"
                 value={formData.image}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                placeholder="https://example.com/your-photo.jpg"
-                helperText="Add a URL to your profile picture (optional)"
+                placeholder={t('profileEdit.form.image.placeholder')}
+                helperText={t('profileEdit.form.image.helper')}
               />
 
               <Textarea
-                label="Bio"
+                label={t('profileEdit.form.bio.label')}
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
+                placeholder={t('profileEdit.form.bio.placeholder')}
                 rows={4}
-                helperText="Share your background and interests"
+                helperText={t('profileEdit.form.bio.helper')}
               />
 
               <Input
-                label="Location"
+                label={t('profileEdit.form.location.label')}
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="Your city or region"
-                helperText="Where are you based?"
+                placeholder={t('profileEdit.form.location.placeholder')}
+                helperText={t('profileEdit.form.location.helper')}
               />
 
               <Input
-                label="Languages"
+                label={t('profileEdit.form.languages.label')}
                 type="text"
                 value={formData.languages}
                 onChange={(e) => setFormData({ ...formData, languages: e.target.value })}
-                placeholder="English, Spanish, French"
-                helperText="List the languages you speak (comma-separated)"
+                placeholder={t('profileEdit.form.languages.placeholder')}
+                helperText={t('profileEdit.form.languages.helper')}
               />
 
               {session?.user?.role === "GUIDE" && (
                 <Input
-                  label="Areas of Expertise"
+                  label={t('profileEdit.form.expertise.label')}
                   type="text"
                   value={formData.expertise}
                   onChange={(e) => setFormData({ ...formData, expertise: e.target.value })}
-                  placeholder="History, Culture, Adventure"
-                  helperText="List your areas of expertise (comma-separated)"
+                  placeholder={t('profileEdit.form.expertise.placeholder')}
+                  helperText={t('profileEdit.form.expertise.helper')}
                 />
               )}
             </div>
@@ -197,14 +201,14 @@ export default function EditProfilePage() {
                 onClick={() => router.back()}
                 className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t('profileEdit.buttons.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={saving}
                 className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t('profileEdit.buttons.saving') : t('profileEdit.buttons.save')}
               </button>
             </div>
           </form>

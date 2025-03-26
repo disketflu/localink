@@ -4,19 +4,21 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Input, Textarea } from "@/components/ui/Input"
+import { useTranslations } from 'next-intl'
 
 export default function CreateTourPage() {
   const router = useRouter()
   const { data: session, status } = useSession()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const t = useTranslations('tours.create')
 
   if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">{t('loading')}</p>
         </div>
       </div>
     )
@@ -37,31 +39,31 @@ export default function CreateTourPage() {
     const included = formData.get("included")?.toString().split(",").map(item => item.trim()) || []
 
     if (!title || title.length < 3) {
-      throw new Error("Title must be at least 3 characters long")
+      throw new Error(t('form.title.error'))
     }
 
     if (!description || description.length < 50) {
-      throw new Error("Description must be at least 50 characters long")
+      throw new Error(t('form.description.error'))
     }
 
     if (!location) {
-      throw new Error("Location is required")
+      throw new Error(t('form.location.error'))
     }
 
     if (isNaN(price) || price <= 0) {
-      throw new Error("Price must be greater than 0")
+      throw new Error(t('form.price.error'))
     }
 
     if (isNaN(duration) || duration <= 0) {
-      throw new Error("Duration must be greater than 0")
+      throw new Error(t('form.duration.error'))
     }
 
     if (isNaN(maxGroupSize) || maxGroupSize <= 0) {
-      throw new Error("Maximum group size must be greater than 0")
+      throw new Error(t('form.maxGroupSize.error'))
     }
 
     if (included.length === 0) {
-      throw new Error("Please specify what's included in the tour")
+      throw new Error(t('form.included.error'))
     }
 
     return {
@@ -95,7 +97,7 @@ export default function CreateTourPage() {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || "Failed to create tour")
+        throw new Error(data.error || t('error'))
       }
 
       router.push("/dashboard")
@@ -104,7 +106,7 @@ export default function CreateTourPage() {
       if (error instanceof Error) {
         setError(error.message)
       } else {
-        setError("An error occurred while creating the tour")
+        setError(t('error'))
       }
     } finally {
       setLoading(false)
@@ -115,7 +117,7 @@ export default function CreateTourPage() {
     <div className="min-h-screen bg-gray-50 py-10">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-sm rounded-lg p-8">
-          <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 mb-8">Create New Tour</h1>
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-gray-900 mb-8">{t('title')}</h1>
           
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
@@ -126,88 +128,88 @@ export default function CreateTourPage() {
 
             <div className="space-y-6">
               <Input
-                label="Tour Title"
+                label={t('form.title.label')}
                 type="text"
                 name="title"
                 id="title"
                 required
-                placeholder="Enter a descriptive title for your tour"
-                helperText="Make it catchy and descriptive"
+                placeholder={t('form.title.placeholder')}
+                helperText={t('form.title.helper')}
               />
 
               <Textarea
-                label="Description"
+                label={t('form.description.label')}
                 name="description"
                 id="description"
                 rows={4}
                 required
-                placeholder="Describe your tour in detail..."
-                helperText="Minimum 50 characters. Include key highlights and what makes your tour unique."
+                placeholder={t('form.description.placeholder')}
+                helperText={t('form.description.helper')}
               />
 
               <Input
-                label="Location"
+                label={t('form.location.label')}
                 type="text"
                 name="location"
                 id="location"
                 required
-                placeholder="Enter the tour location"
-                helperText="Be specific about the city/region"
+                placeholder={t('form.location.placeholder')}
+                helperText={t('form.location.helper')}
               />
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <Input
-                  label="Price (USD)"
+                  label={t('form.price.label')}
                   type="number"
                   name="price"
                   id="price"
                   min="0"
                   step="0.01"
                   required
-                  placeholder="0.00"
-                  helperText="Set a competitive price"
+                  placeholder={t('form.price.placeholder')}
+                  helperText={t('form.price.helper')}
                 />
 
                 <Input
-                  label="Duration (hours)"
+                  label={t('form.duration.label')}
                   type="number"
                   name="duration"
                   id="duration"
                   min="1"
                   required
-                  placeholder="Enter duration"
-                  helperText="Total tour duration"
+                  placeholder={t('form.duration.placeholder')}
+                  helperText={t('form.duration.helper')}
                 />
               </div>
 
               <Input
-                label="Maximum Group Size"
+                label={t('form.maxGroupSize.label')}
                 type="number"
                 name="maxGroupSize"
                 id="maxGroupSize"
                 min="1"
                 required
-                placeholder="Enter maximum group size"
-                helperText="Consider the optimal group size for the best experience"
+                placeholder={t('form.maxGroupSize.placeholder')}
+                helperText={t('form.maxGroupSize.helper')}
               />
 
               <Input
-                label="What's Included"
+                label={t('form.included.label')}
                 type="text"
                 name="included"
                 id="included"
                 required
-                placeholder="e.g., Guide, Transportation, Snacks"
-                helperText="Separate items with commas"
+                placeholder={t('form.included.placeholder')}
+                helperText={t('form.included.helper')}
               />
 
               <Input
-                label="Image URL"
+                label={t('form.imageUrl.label')}
                 type="url"
                 name="imageUrl"
                 id="imageUrl"
-                placeholder="https://example.com/tour-image.jpg"
-                helperText="Add a representative image of your tour (optional)"
+                placeholder={t('form.imageUrl.placeholder')}
+                helperText={t('form.imageUrl.helper')}
               />
             </div>
 
@@ -217,14 +219,14 @@ export default function CreateTourPage() {
                 onClick={() => router.back()}
                 className="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t('buttons.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? "Creating..." : "Create Tour"}
+                {loading ? t('buttons.submitting') : t('buttons.submit')}
               </button>
             </div>
           </form>
