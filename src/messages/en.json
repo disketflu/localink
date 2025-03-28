@@ -78,7 +78,9 @@
         "COMPLETED": "Completed"
       },
       "confirm": "Confirm booking",
-      "confirmConfirm": "Are you sure you want to confirm this booking?"
+      "confirmConfirm": "Are you sure you want to confirm this booking?",
+      "markAsCompleted": "Mark as Completed",
+      "markAsCompletedConfirm": "Are you sure you want to mark this booking as completed?"
     },
     "reviews": {
       "noReviews": "No reviews yet for your tours.",

@@ -22,6 +22,32 @@ A full-featured SaaS platform connecting local guides with tourists, built with 
 - **Database**: PostgreSQL with Prisma ORM
 - **Modern Stack**: Next.js 14 with App Router
 
+## 📸 Application Screenshots
+
+### Landing Page
+![Landing Page](screenshots/landing_page.png)
+
+### Tourist Dashboard
+#### Profile Section
+![Tourist Profile Dashboard](screenshots/profile_tourist_dashboard.png)
+
+#### Messages Section
+![Tourist Messages Dashboard](screenshots/messages_tourist_dashboard.png)
+
+### Tour Pages
+#### Tour Details
+![Tour Page](screenshots/tour_page.png)
+
+#### Review Tour
+![Review Tour Page](screenshots/review_tour_page.png)
+
+### Guide Dashboard
+#### Tours Management
+![Guide Tours Dashboard](screenshots/tours_guide_dashboard.png)
+
+#### Bookings Management
+![Guide Bookings Dashboard](screenshots/bookings_guide_dashboard.png)
+
 ## 🏗️ Technical Architecture
 
 ### Frontend

@@ -78,7 +78,9 @@
         "COMPLETED": "Terminée"
       },
       "confirm": "Confirmer la réservation",
-      "confirmConfirm": "Êtes-vous sûr de vouloir confirmer cette réservation ?"
+      "confirmConfirm": "Êtes-vous sûr de vouloir confirmer cette réservation ?",
+      "markAsCompleted": "Marquer comme terminée",
+      "markAsCompletedConfirm": "Êtes-vous sûr de vouloir marquer cette réservation comme terminée ?"
     },
     "reviews": {
       "noReviews": "Aucun avis pour vos visites pour le moment.",

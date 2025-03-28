@@ -471,6 +471,42 @@ export default function GuideDashboard() {
                               {t('bookings.confirm')}
                             </button>
                           )}
+                          {booking.status === "CONFIRMED" && (
+                            <button
+                              onClick={async () => {
+                                if (confirm(t('bookings.markAsCompletedConfirm'))) {
+                                  try {
+                                    const response = await fetch(
+                                      `/api/bookings/${booking.id}`,
+                                      {
+                                        method: "PATCH",
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify({
+                                          status: "COMPLETED"
+                                        })
+                                      }
+                                    )
+                                    if (!response.ok) {
+                                      throw new Error("Failed to mark booking as completed")
+                                    }
+                                    // Update local state
+                                    setBookings(bookings.map(b => 
+                                      b.id === booking.id 
+                                        ? { ...b, status: "COMPLETED" }
+                                        : b
+                                    ))
+                                  } catch (err) {
+                                    console.error("Error marking booking as completed:", err)
+                                  }
+                                }
+                              }}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                              {t('bookings.markAsCompleted')}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import ReviewForm from "@/components/ReviewForm"
+import { use } from "react"
 
 interface Tour {
   id: string
@@ -20,7 +21,8 @@ interface Tour {
   }
 }
 
-export default function ReviewPage({ params }: { params: { id: string } }) {
+export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -30,7 +32,7 @@ export default function ReviewPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     const fetchTour = async () => {
       try {
-        const response = await fetch(`/api/tours/${params.id}`)
+        const response = await fetch(`/api/tours/${resolvedParams.id}`)
         if (!response.ok) {
           throw new Error("Failed to fetch tour")
         }
@@ -46,7 +48,7 @@ export default function ReviewPage({ params }: { params: { id: string } }) {
     if (status === "authenticated") {
       fetchTour()
     }
-  }, [status, params.id])
+  }, [status, resolvedParams.id])
 
   if (status === "loading" || loading) {
     return (
